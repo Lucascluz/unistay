@@ -17,13 +17,13 @@ Simple and maintainable Node.js + Express + TypeScript backend for StudyStay MVP
 
 - Node.js 18+ (or use nvm: `nvm use`)
 - Docker & Docker Compose
-- npm or pnpm
+- pnpm (recommended) or npm
 
 ### Installation
 
 1. **Install dependencies**:
    ```bash
-   npm install
+   pnpm install
    ```
 
 2. **Start PostgreSQL database**:
@@ -33,12 +33,12 @@ Simple and maintainable Node.js + Express + TypeScript backend for StudyStay MVP
 
 3. **Run database migrations**:
    ```bash
-   npm run migrate
+   pnpm run migrate
    ```
 
 4. **Start development server**:
    ```bash
-   npm run dev
+   pnpm run dev
    ```
 
 The API will be available at `http://localhost:3001`
