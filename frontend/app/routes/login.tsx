@@ -46,13 +46,15 @@ export default function Login() {
         {/* Header */}
         <div className="text-center mb-8">
           <div 
-            className="flex items-center justify-center gap-2 mb-4 cursor-pointer"
+            className="flex items-center justify-center gap-8 mb-4 cursor-pointer"
             onClick={() => navigate("/")}
           >
-            <div className="h-10 w-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">S</span>
-            </div>
-            <span className="text-2xl font-bold text-gray-900 dark:text-white">StudentStay</span>
+            <img 
+              src="/study-stay-logo.png" 
+              alt="StudentStay Logo" 
+              className="h-48 w-48 object-contain"
+            />
+            <span className="text-7xl font-bold text-gray-900 dark:text-white">StudentStay</span>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
             Welcome back

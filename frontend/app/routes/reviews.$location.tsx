@@ -95,13 +95,15 @@ export default function ReviewsPage() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div 
-              className="flex items-center gap-2 cursor-pointer"
+              className="flex items-center gap-6 cursor-pointer"
               onClick={() => navigate("/")}
             >
-              <div className="h-8 w-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">S</span>
-              </div>
-              <span className="text-xl font-bold text-gray-900 dark:text-white">StudentStay</span>
+              <img 
+                src="/study-stay-logo.png" 
+                alt="StudentStay Logo" 
+                className="h-40 w-40 object-contain"
+              />
+              <span className="text-6xl font-bold text-gray-900 dark:text-white">StudentStay</span>
             </div>
             <div className="flex items-center gap-3">
               {isLoggedIn && (
