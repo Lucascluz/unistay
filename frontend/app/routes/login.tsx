@@ -118,6 +118,15 @@ export default function Login() {
                 Sign up
               </button>
             </p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-3">
+              Are you a business?{" "}
+              <button
+                onClick={() => navigate("/company/login")}
+                className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold"
+              >
+                Company Login
+              </button>
+            </p>
           </div>
         </Card>
 

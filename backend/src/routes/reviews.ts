@@ -2,7 +2,7 @@ import { Router, Response } from 'express';
 import { z } from 'zod';
 import { pool } from '../db/config';
 import { authMiddleware, optionalAuth, AuthRequest } from '../middleware/auth';
-import { Review, ReviewPublic } from '../types';
+import { Review, ReviewPublic, ReviewResponse, ReviewResponsePublic, User, Company } from '../types';
 
 const router = Router();
 
@@ -14,14 +14,55 @@ const createReviewSchema = z.object({
   review: z.string().min(10).max(5000),
 });
 
+// Helper to convert DB response to public format
+async function toPublicResponse(response: ReviewResponse): Promise<ReviewResponsePublic> {
+  let authorName = 'Unknown';
+  let authorType: 'user' | 'company' = 'user';
+  let companyName: string | undefined;
+  let companyType: string | undefined;
+
+  if (response.is_company_response && response.company_id) {
+    authorType = 'company';
+    const companyResult = await pool.query<Company>(
+      'SELECT name, company_type FROM companies WHERE id = $1',
+      [response.company_id]
+    );
+    if (companyResult.rows.length > 0) {
+      authorName = companyResult.rows[0].name;
+      companyName = companyResult.rows[0].name;
+      companyType = companyResult.rows[0].company_type;
+    }
+  } else if (response.user_id) {
+    const userResult = await pool.query<User>(
+      'SELECT name FROM users WHERE id = $1',
+      [response.user_id]
+    );
+    if (userResult.rows.length > 0) {
+      authorName = userResult.rows[0].name;
+    }
+  }
+
+  return {
+    id: response.id,
+    reviewId: response.review_id,
+    authorName,
+    authorType,
+    companyName,
+    companyType,
+    responseText: response.response_text,
+    createdAt: response.created_at.toISOString(),
+    updatedAt: response.updated_at.toISOString(),
+  };
+}
+
 // Helper to convert DB review to public format
-async function toPublicReview(review: Review): Promise<ReviewPublic> {
+async function toPublicReview(review: Review, includeResponses: boolean = false): Promise<ReviewPublic> {
   const userResult = await pool.query(
     'SELECT name FROM users WHERE id = $1',
     [review.user_id]
   );
   
-  return {
+  const publicReview: ReviewPublic = {
     id: review.id,
     userId: review.user_id,
     author: userResult.rows[0]?.name || 'Unknown',
@@ -33,6 +74,19 @@ async function toPublicReview(review: Review): Promise<ReviewPublic> {
     createdAt: review.created_at.toISOString(),
     updatedAt: review.updated_at.toISOString(),
   };
+
+  if (includeResponses) {
+    const responsesResult = await pool.query<ReviewResponse>(
+      'SELECT * FROM review_responses WHERE review_id = $1 ORDER BY created_at ASC',
+      [review.id]
+    );
+    
+    publicReview.responses = await Promise.all(
+      responsesResult.rows.map(response => toPublicResponse(response))
+    );
+  }
+
+  return publicReview;
 }
 
 // Get reviews with filters
@@ -42,6 +96,7 @@ router.get('/', optionalAuth, async (req: AuthRequest, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const sortBy = (req.query.sortBy as string) || 'recent';
+    const includeResponses = (req.query.includeResponses as string) === 'true';
     const offset = (page - 1) * limit;
 
     let orderBy = 'created_at DESC';
@@ -71,7 +126,7 @@ router.get('/', optionalAuth, async (req: AuthRequest, res: Response) => {
 
     const total = parseInt(countResult.rows[0].count);
     const reviews = await Promise.all(
-      reviewsResult.rows.map(review => toPublicReview(review))
+      reviewsResult.rows.map(review => toPublicReview(review, includeResponses))
     );
 
     res.json({

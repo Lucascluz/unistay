@@ -21,6 +21,7 @@ export const reviewsApi = {
     if (params.page) queryParams.append('page', params.page.toString());
     if (params.limit) queryParams.append('limit', params.limit.toString());
     if (params.sortBy) queryParams.append('sortBy', params.sortBy);
+    if (params.includeResponses) queryParams.append('includeResponses', 'true');
 
     const queryString = queryParams.toString();
     const endpoint = `/reviews${queryString ? `?${queryString}` : ''}`;

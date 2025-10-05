@@ -26,6 +26,7 @@ export function useReviews(location: string, initialParams?: Omit<GetReviewsPara
         page: currentPage,
         limit: initialParams?.limit || 10,
         sortBy: initialParams?.sortBy || 'recent',
+        includeResponses: true, // Always include responses
       });
 
       if (currentPage === 1) {

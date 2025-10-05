@@ -7,7 +7,7 @@ import { Badge } from "~/components/ui/badge";
 import { useAuth } from "~/lib/auth";
 import type { Route } from "./+types/home";
 
-export function meta({}: Route.MetaArgs) {
+export function meta({ }: Route.MetaArgs) {
   return [
     { title: "StudentStay - Find Honest Student Housing Reviews" },
     { name: "description", content: "Discover real student experiences and reviews about housing in your city or university." },
@@ -51,17 +51,15 @@ export default function Home() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
-              <img 
-                src="/study-stay-logo.png" 
-                alt="StudentStay Logo" 
+              <img
+                src="/study-stay-logo.png"
+                alt="StudentStay Logo"
                 className="h-40 w-40 object-contain"
               />
               <span className="text-6xl font-bold text-gray-900 dark:text-white">Student</span>
               <span className="text-6xl font-bold text-blue-900 dark:text-blue">Stay</span>
             </div>
             <nav className="hidden md:flex gap-6 items-center">
-              <a href="#" className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">About</a>
-              <a href="#" className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">How it works</a>
               {isLoggedIn ? (
                 <div className="flex items-center gap-4">
                   <span className="text-sm text-gray-700 dark:text-gray-300">
@@ -98,13 +96,13 @@ export default function Home() {
                 </svg>
               ))}
             </div>
-            
+
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-4">
               Find your perfect
               <br />
               <span className="text-blue-600 dark:text-blue-500">student home</span>
             </h1>
-            
+
             <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
               Read honest reviews from real students about housing in your city or university.
               Make informed decisions for your student life.
@@ -115,17 +113,17 @@ export default function Home() {
               <div className="flex flex-col sm:flex-row gap-3">
                 <Input
                   type="text"
-                  placeholder="Enter city or university name..."
+                  placeholder="Enter city, university or housing platform..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="flex-1 h-14 text-lg px-6 border-gray-300 dark:border-gray-700"
                 />
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   size="lg"
                   className="h-14 px-8 bg-blue-600 hover:bg-blue-700 text-white"
                 >
-                  Search Reviews
+                  Search
                 </Button>
               </div>
             </form>
@@ -181,6 +179,31 @@ export default function Home() {
           </div>
         </div>
       </main>
+
+      {/* Footer */}
+      <footer className="border-t border-gray-200 dark:border-gray-800 py-8">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              © 2025 StudentStay. All rights reserved.
+            </p>
+            <div className="flex gap-6 text-sm">
+              <button
+                onClick={() => navigate("/company/login")}
+                className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
+              >
+                For Companies
+              </button>
+              <button
+                onClick={() => navigate("/admin/dashboard")}
+                className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
+              >
+                Admin Access
+              </button>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

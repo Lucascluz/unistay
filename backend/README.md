@@ -138,6 +138,12 @@ npm start
 # Run migrations
 npm run migrate
 
+# Generate admin secret key
+npm run generate:admin-key
+
+# Seed admin user (for testing)
+npm run seed:admin
+
 # Start database
 docker-compose up -d
 
@@ -147,6 +153,59 @@ docker-compose down
 # View database logs
 docker-compose logs -f postgres
 ```
+
+## Admin System
+
+The backend includes a complete admin verification system for reviewing and managing company registrations.
+
+### Setup Admin Access
+
+1. **Generate an admin key**:
+   ```bash
+   npm run generate:admin-key
+   ```
+
+2. **Add to .env file**:
+   ```bash
+   ADMIN_SECRET_KEY=your-generated-key-here
+   ```
+
+3. **Access admin endpoints** with the `x-admin-key` header:
+   ```bash
+   curl http://localhost:3001/api/admin/companies/pending \
+     -H "x-admin-key: your-key-here"
+   ```
+
+### Admin API Endpoints
+
+All admin endpoints require the `x-admin-key` header.
+
+- `GET /api/admin/companies/pending` - Get pending company requests
+- `GET /api/admin/companies?status=verified` - Get companies by status
+- `GET /api/admin/companies/:id` - Get company details with history
+- `POST /api/admin/companies/verify` - Approve/reject company
+  ```json
+  {
+    "companyId": "uuid",
+    "status": "verified",
+    "notes": "Optional notes"
+  }
+  ```
+- `GET /api/admin/stats` - Get admin statistics
+- `DELETE /api/admin/responses/:id` - Delete response (moderation)
+
+### Admin Database Tables
+
+**admins**:
+- Stores admin user accounts with roles
+- Supports 'admin' and 'super_admin' roles
+
+**company_verification_actions**:
+- Logs all verification decisions
+- Tracks which admin made the decision
+- Stores notes for audit trail
+
+For more details, see `ADMIN_README.md` in the project root.
 
 ## Database Management
 

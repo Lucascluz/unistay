@@ -4,6 +4,9 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/auth';
 import reviewsRoutes from './routes/reviews';
 import locationsRoutes from './routes/locations';
+import companiesRoutes from './routes/companies';
+import responsesRoutes from './routes/responses';
+import adminRoutes from './routes/admin';
 
 dotenv.config();
 
@@ -31,6 +34,9 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/reviews', reviewsRoutes);
 app.use('/api/locations', locationsRoutes);
+app.use('/api/companies', companiesRoutes);
+app.use('/api/responses', responsesRoutes);
+app.use('/api/admin', adminRoutes);
 
 // 404 handler
 app.use((req, res) => {

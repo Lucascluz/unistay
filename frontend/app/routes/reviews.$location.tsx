@@ -17,6 +17,7 @@ import { useAuth } from "~/lib/auth";
 import { useReviews, useCreateReview, useMarkHelpful } from "~/lib/useReviews";
 import { locationsApi } from "~/lib/api/locations";
 import type { LocationStats } from "~/lib/api/types";
+import { ReviewResponses } from "~/components/ReviewResponses";
 
 export function meta({ params }: { params: { location: string } }) {
   return [
@@ -324,6 +325,13 @@ export default function ReviewsPage() {
                       Helpful ({review.helpful})
                     </button>
                   </div>
+
+                  {/* Review Responses */}
+                  <ReviewResponses 
+                    reviewId={review.id} 
+                    responses={review.responses}
+                    onResponseAdded={refresh}
+                  />
                 </div>
               </Card>
             ))}

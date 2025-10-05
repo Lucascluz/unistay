@@ -30,8 +30,70 @@ export interface AuthResponse {
 }
 
 // ============================================================================
+// Company Types
+// ============================================================================
+
+export interface Company {
+  id: string;
+  name: string;
+  email: string;
+  companyType: 'landlord' | 'housing_platform' | 'university';
+  verificationStatus: 'pending' | 'verified' | 'rejected';
+  website?: string;
+  createdAt: string;
+}
+
+export interface CompanyRegisterRequest {
+  name: string;
+  email: string;
+  password: string;
+  companyType: 'landlord' | 'housing_platform' | 'university';
+  taxId?: string;
+  website?: string;
+  verificationDocumentUrl?: string;
+}
+
+export interface CompanyLoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface CompanyAuthResponse {
+  token: string;
+  company: Company;
+}
+
+export interface CompanyRepresentative {
+  id: string;
+  company_id: string;
+  user_email: string;
+  role: string;
+  is_primary: boolean;
+  verified: boolean;
+  created_at: string;
+}
+
+export interface AddRepresentativeRequest {
+  userEmail: string;
+  role: string;
+  isPrimary?: boolean;
+}
+
+// ============================================================================
 // Review Types
 // ============================================================================
+
+export interface ReviewResponse {
+  id: string;
+  reviewId: string;
+  authorName: string;
+  authorType: 'user' | 'company';
+  companyName?: string;
+  companyType?: string;
+  responseText: string;
+  createdAt: string;
+  updatedAt?: string;
+}
 
 export interface Review {
   id: string;
@@ -44,6 +106,7 @@ export interface Review {
   helpful: number;
   createdAt: string;
   updatedAt?: string;
+  responses?: ReviewResponse[];
 }
 
 export interface CreateReviewRequest {
@@ -58,6 +121,7 @@ export interface GetReviewsParams {
   page?: number;
   limit?: number;
   sortBy?: 'recent' | 'rating' | 'helpful';
+  includeResponses?: boolean;
 }
 
 export interface ReviewsResponse {
@@ -66,6 +130,11 @@ export interface ReviewsResponse {
   page: number;
   limit: number;
   hasMore: boolean;
+}
+
+export interface CreateResponseRequest {
+  reviewId: string;
+  responseText: string;
 }
 
 // ============================================================================
