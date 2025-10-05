@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
@@ -14,7 +14,9 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import { useAuth } from "~/lib/auth";
-// Removed import of missing Route type
+import { useReviews, useCreateReview, useMarkHelpful } from "~/lib/useReviews";
+import { locationsApi } from "~/lib/api/locations";
+import type { LocationStats } from "~/lib/api/types";
 
 export function meta({ params }: { params: { location: string } }) {
   return [
@@ -22,37 +24,6 @@ export function meta({ params }: { params: { location: string } }) {
     { name: "description", content: `Read honest student housing reviews for ${params.location}` },
   ];
 }
-
-// Mock data - replace with real data from your backend
-const mockReviews = [
-  {
-    id: 1,
-    author: "Sarah M.",
-    rating: 5,
-    date: "2 weeks ago",
-    property: "Campus Residences",
-    review: "Amazing place to live! Close to campus, great facilities, and the community is wonderful. Would definitely recommend to other students.",
-    helpful: 24,
-  },
-  {
-    id: 2,
-    author: "John D.",
-    rating: 4,
-    date: "1 month ago",
-    property: "Student Apartments Downtown",
-    review: "Good location and reasonable price. The apartment is a bit small but perfect for students. Management is responsive to maintenance requests.",
-    helpful: 18,
-  },
-  {
-    id: 3,
-    author: "Emma L.",
-    rating: 3,
-    date: "2 months ago",
-    property: "University Housing Block A",
-    review: "Decent place but could use some updates. The location is great and it's affordable. Internet connection could be better.",
-    helpful: 12,
-  },
-];
 
 export default function ReviewsPage() {
   const { location } = useParams();
@@ -66,9 +37,28 @@ export default function ReviewsPage() {
     rating: 5,
     review: "",
   });
+  const [locationStats, setLocationStats] = useState<LocationStats | null>(null);
 
-  const averageRating = 4.2;
-  const totalReviews = mockReviews.length;
+  // Use the custom hooks
+  const { reviews, isLoading, error, hasMore, total, loadMore, refresh } = useReviews(decodedLocation);
+  const { createReview, isSubmitting, error: submitError } = useCreateReview();
+  const { markHelpful, loading: markingHelpful } = useMarkHelpful();
+
+  // Fetch location stats
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const stats = await locationsApi.getLocationStats(decodedLocation);
+        setLocationStats(stats);
+      } catch (err) {
+        console.error('Failed to fetch location stats:', err);
+      }
+    };
+    
+    if (decodedLocation) {
+      fetchStats();
+    }
+  }, [decodedLocation]);
 
   const handleWriteReview = () => {
     if (!isLoggedIn) {
@@ -79,13 +69,51 @@ export default function ReviewsPage() {
     }
   };
 
-  const handleSubmitReview = (e: React.FormEvent) => {
+  const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Submit review to backend
-    console.log("Submitting review:", reviewData);
-    setIsReviewDialogOpen(false);
-    // Reset form
-    setReviewData({ property: "", rating: 5, review: "" });
+    
+    try {
+      await createReview({
+        location: decodedLocation,
+        property: reviewData.property,
+        rating: reviewData.rating,
+        review: reviewData.review,
+      });
+      
+      setIsReviewDialogOpen(false);
+      // Reset form
+      setReviewData({ property: "", rating: 5, review: "" });
+      // Refresh reviews list
+      refresh();
+    } catch (err) {
+      console.error('Failed to submit review:', err);
+    }
+  };
+
+  const handleMarkHelpful = async (reviewId: string) => {
+    await markHelpful(reviewId);
+    // Refresh to get updated helpful count
+    refresh();
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 7) {
+      return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+    } else if (diffDays < 30) {
+      const weeks = Math.floor(diffDays / 7);
+      return `${weeks} week${weeks > 1 ? 's' : ''} ago`;
+    } else if (diffDays < 365) {
+      const months = Math.floor(diffDays / 30);
+      return `${months} month${months > 1 ? 's' : ''} ago`;
+    } else {
+      const years = Math.floor(diffDays / 365);
+      return `${years} year${years > 1 ? 's' : ''} ago`;
+    }
   };
 
   return (
@@ -128,57 +156,59 @@ export default function ReviewsPage() {
               Student Housing in {decodedLocation}
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Read {totalReviews} honest reviews from students
+              {total > 0 ? `Read ${total} honest review${total !== 1 ? 's' : ''} from students` : 'Be the first to review!'}
             </p>
           </div>
 
           {/* Stats Overview */}
-          <Card className="p-6 mb-8 bg-white dark:bg-gray-900">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-4xl font-bold text-gray-900 dark:text-white">
-                    {averageRating}
-                  </span>
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <svg
-                        key={i}
-                        className={`w-6 h-6 ${
-                          i < Math.floor(averageRating) ? "text-green-500" : "text-gray-300"
-                        }`}
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                    ))}
+          {locationStats && (
+            <Card className="p-6 mb-8 bg-white dark:bg-gray-900">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-4xl font-bold text-gray-900 dark:text-white">
+                      {locationStats.averageRating.toFixed(1)}
+                    </span>
+                    <div className="flex">
+                      {[...Array(5)].map((_, i) => (
+                        <svg
+                          key={i}
+                          className={`w-6 h-6 ${
+                            i < Math.floor(locationStats.averageRating) ? "text-green-500" : "text-gray-300"
+                          }`}
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                      ))}
+                    </div>
                   </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Based on {locationStats.totalReviews} review{locationStats.totalReviews !== 1 ? 's' : ''}
+                  </p>
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Based on {totalReviews} reviews
-                </p>
-              </div>
 
-              <div>
-                <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-                  85%
+                <div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+                    {Math.round(locationStats.recommendationRate)}%
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Would recommend to other students
+                  </p>
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Would recommend to other students
-                </p>
-              </div>
 
-              <div>
-                <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-                  42
+                <div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+                    {locationStats.totalProperties}
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Properties reviewed
+                  </p>
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Properties reviewed
-                </p>
               </div>
-            </div>
-          </Card>
+            </Card>
+          )}
 
           {/* Add Review Button */}
           <div className="mb-6 flex items-center gap-4">
@@ -196,9 +226,38 @@ export default function ReviewsPage() {
             )}
           </div>
 
+          {/* Error state */}
+          {error && (
+            <Card className="p-6 mb-6 bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800">
+              <p className="text-red-600 dark:text-red-400">
+                Failed to load reviews. Please try again later.
+              </p>
+            </Card>
+          )}
+
+          {/* Loading state */}
+          {isLoading && reviews.length === 0 && (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="mt-4 text-gray-600 dark:text-gray-400">Loading reviews...</p>
+            </div>
+          )}
+
+          {/* Empty state */}
+          {!isLoading && reviews.length === 0 && !error && (
+            <Card className="p-12 text-center bg-white dark:bg-gray-900">
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                No reviews yet for {decodedLocation}
+              </p>
+              <Button onClick={handleWriteReview}>
+                Be the first to review!
+              </Button>
+            </Card>
+          )}
+
           {/* Reviews List */}
           <div className="space-y-4">
-            {mockReviews.map((review) => (
+            {reviews.map((review) => (
               <Card key={review.id} className="p-6 bg-white dark:bg-gray-900">
                 <div className="flex flex-col gap-4">
                   {/* Review Header */}
@@ -206,14 +265,14 @@ export default function ReviewsPage() {
                     <div>
                       <div className="flex items-center gap-3 mb-2">
                         <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
-                          {isLoggedIn ? review.author.charAt(0) : "?"}
+                          {review.author.charAt(0).toUpperCase()}
                         </div>
                         <div>
                           <div className="font-semibold text-gray-900 dark:text-white">
-                            {isLoggedIn ? review.author : "Anonymous User"}
+                            {review.author}
                           </div>
                           <div className="text-sm text-gray-500 dark:text-gray-400">
-                            {review.date}
+                            {formatDate(review.createdAt)}
                           </div>
                         </div>
                       </div>
@@ -244,7 +303,11 @@ export default function ReviewsPage() {
 
                   {/* Review Footer */}
                   <div className="flex items-center gap-4 pt-2 border-t border-gray-200 dark:border-gray-800">
-                    <button className="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-1">
+                    <button 
+                      className="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={() => handleMarkHelpful(review.id)}
+                      disabled={markingHelpful === review.id}
+                    >
                       <svg
                         className="w-4 h-4"
                         fill="none"
@@ -260,9 +323,6 @@ export default function ReviewsPage() {
                       </svg>
                       Helpful ({review.helpful})
                     </button>
-                    <button className="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400">
-                      Reply
-                    </button>
                   </div>
                 </div>
               </Card>
@@ -270,11 +330,18 @@ export default function ReviewsPage() {
           </div>
 
           {/* Load More */}
-          <div className="mt-8 text-center">
-            <Button variant="outline" size="lg">
-              Load More Reviews
-            </Button>
-          </div>
+          {hasMore && (
+            <div className="mt-8 text-center">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                onClick={loadMore}
+                disabled={isLoading}
+              >
+                {isLoading ? 'Loading...' : 'Load More Reviews'}
+              </Button>
+            </div>
+          )}
         </div>
       </main>
 
@@ -287,6 +354,13 @@ export default function ReviewsPage() {
               Share your experience with student housing in {decodedLocation}
             </DialogDescription>
           </DialogHeader>
+          
+          {submitError && (
+            <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-md p-3 text-sm text-red-600 dark:text-red-400">
+              {submitError}
+            </div>
+          )}
+          
           <form onSubmit={handleSubmitReview} className="space-y-6 mt-4">
             <div className="space-y-2">
               <Label htmlFor="property">Property Name</Label>
@@ -347,11 +421,16 @@ export default function ReviewsPage() {
                 type="button"
                 variant="outline"
                 onClick={() => setIsReviewDialogOpen(false)}
+                disabled={isSubmitting}
               >
                 Cancel
               </Button>
-              <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-                Submit Review
+              <Button 
+                type="submit" 
+                className="bg-blue-600 hover:bg-blue-700"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit Review'}
               </Button>
             </div>
           </form>

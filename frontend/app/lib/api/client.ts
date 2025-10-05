@@ -64,7 +64,21 @@ class ApiClient {
         return {} as T;
       }
 
-      return isJson ? await response.json() : ({} as T);
+      if (!isJson) {
+        return {} as T;
+      }
+
+      // Parse JSON response and unwrap the data field if it exists
+      const json = await response.json();
+      
+      // Backend returns { success: true, data: {...} } format
+      // We want to return just the data
+      if (json.success && json.data !== undefined) {
+        return json.data as T;
+      }
+      
+      // If no data field, return the whole response
+      return json as T;
     } catch (error) {
       if (error instanceof ApiError) {
         throw error;
