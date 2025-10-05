@@ -5,9 +5,8 @@ import { Input } from "~/components/ui/input";
 import { Card } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { useAuth } from "~/lib/auth";
-import type { Route } from "./+types/home";
 
-export function meta({ }: Route.MetaArgs) {
+export function meta({ }: any) {
   return [
     { title: "StudentStay - Find Honest Student Housing Reviews" },
     { name: "description", content: "Discover real student experiences and reviews about housing in your city or university." },
