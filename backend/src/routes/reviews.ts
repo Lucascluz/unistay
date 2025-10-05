@@ -58,7 +58,7 @@ async function toPublicResponse(response: ReviewResponse): Promise<ReviewRespons
 // Helper to convert DB review to public format
 async function toPublicReview(review: Review, includeResponses: boolean = false): Promise<ReviewPublic> {
   const userResult = await pool.query(
-    'SELECT name FROM users WHERE id = $1',
+    'SELECT name, trust_score FROM users WHERE id = $1',
     [review.user_id]
   );
   
@@ -66,6 +66,7 @@ async function toPublicReview(review: Review, includeResponses: boolean = false)
     id: review.id,
     userId: review.user_id,
     author: userResult.rows[0]?.name || 'Unknown',
+    authorTrustScore: userResult.rows[0]?.trust_score,
     location: review.location,
     property: review.property,
     rating: review.rating,

@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { pool } from '../db/config';
 import { generateToken } from '../utils/jwt';
 import { User, UserPublic } from '../types';
+import { calculateUserProfileCompletion, calculateUserTrustScore } from '../utils/trust-score';
 
 const router = Router();
 
@@ -12,6 +13,13 @@ const registerSchema = z.object({
   name: z.string().min(1).max(255),
   email: z.string().email().max(255),
   password: z.string().min(6).max(100),
+  // Optional demographic fields
+  nationality: z.string().max(100).optional(),
+  gender: z.enum(['male', 'female', 'non_binary', 'prefer_not_to_say']).optional(),
+  birth_date: z.string().optional(), // ISO date string
+  // Required consent
+  data_consent: z.boolean(),
+  anonymized_data_opt_in: z.boolean().optional(),
 });
 
 const loginSchema = z.object({
@@ -23,8 +31,13 @@ const loginSchema = z.object({
 function toPublicUser(user: User): UserPublic {
   return {
     id: user.id,
-    name: user.name,
-    email: user.email,
+    nationality: user.nationality,
+    destination_university: user.destination_university,
+    study_field: user.study_field,
+    current_city: user.current_city,
+    current_housing_type: user.current_housing_type,
+    trust_score: user.trust_score,
+    profile_completion_percentage: user.profile_completion_percentage,
     createdAt: user.created_at.toISOString(),
   };
 }
@@ -32,7 +45,17 @@ function toPublicUser(user: User): UserPublic {
 // Register
 router.post('/register', async (req: Request, res: Response) => {
   try {
-    const { name, email, password } = registerSchema.parse(req.body);
+    const data = registerSchema.parse(req.body);
+    const { name, email, password, nationality, gender, birth_date, data_consent, anonymized_data_opt_in } = data;
+
+    // Validate data consent
+    if (!data_consent) {
+      return res.status(400).json({
+        success: false,
+        error: 'Data consent required',
+        message: 'You must consent to data processing to register',
+      });
+    }
 
     // Check if user exists
     const existingUser = await pool.query(
@@ -51,12 +74,47 @@ router.post('/register', async (req: Request, res: Response) => {
     // Hash password
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // Create user
+    // Calculate initial metrics
+    const profileData = {
+      name,
+      email,
+      nationality,
+      gender,
+      birth_date: birth_date ? new Date(birth_date) : undefined
+    };
+    
+    const profile_completion = calculateUserProfileCompletion(profileData);
+    const trust_score = calculateUserTrustScore(profileData, {
+      profile_completion,
+      account_age_days: 0,
+      engagement_level: 0,
+      helpful_votes_ratio: 0,
+      review_consistency: 50,
+      verified_identity: false
+    });
+
+    // Create user with enhanced fields
     const result = await pool.query<User>(
-      `INSERT INTO users (name, email, password_hash)
-       VALUES ($1, $2, $3)
+      `INSERT INTO users (
+        name, email, password_hash, nationality, gender, birth_date,
+        data_consent, anonymized_data_opt_in, trust_score, 
+        profile_completion_percentage, number_of_reviews,
+        number_of_helpful_votes_received, created_at, updated_at
+      )
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 0, 0, NOW(), NOW())
        RETURNING *`,
-      [name, email, passwordHash]
+      [
+        name, 
+        email, 
+        passwordHash,
+        nationality || null,
+        gender || null,
+        birth_date ? new Date(birth_date) : null,
+        data_consent,
+        anonymized_data_opt_in || false,
+        trust_score,
+        profile_completion
+      ]
     );
 
     const user = result.rows[0];

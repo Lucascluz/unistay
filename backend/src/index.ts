@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth';
+import usersRoutes from './routes/users';
 import reviewsRoutes from './routes/reviews';
 import locationsRoutes from './routes/locations';
 import companiesRoutes from './routes/companies';
@@ -32,6 +33,7 @@ app.get('/health', (req, res) => {
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/users', usersRoutes);
 app.use('/api/reviews', reviewsRoutes);
 app.use('/api/locations', locationsRoutes);
 app.use('/api/companies', companiesRoutes);

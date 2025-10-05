@@ -64,6 +64,9 @@ export default function Home() {
                   <span className="text-sm text-gray-700 dark:text-gray-300">
                     Hi, {user?.name}
                   </span>
+                  <Button variant="outline" size="sm" onClick={() => navigate("/profile")}>
+                    My Profile
+                  </Button>
                   <Button variant="outline" size="sm" onClick={logout}>
                     Sign out
                   </Button>

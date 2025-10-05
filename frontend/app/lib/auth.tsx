@@ -1,13 +1,22 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
-import { authApi, type User } from "./api";
+import { authApi, type User, type RegisterRequest } from "./api";
 
 interface AuthContextType {
   user: User | null;
   isLoggedIn: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  register: (
+    name: string, 
+    email: string, 
+    password: string,
+    nationality?: string,
+    gender?: 'male' | 'female' | 'non_binary' | 'prefer_not_to_say',
+    birthDate?: string,
+    dataConsent?: boolean,
+    anonymizedDataOptIn?: boolean
+  ) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -42,8 +51,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('token', response.token);
   };
 
-  const register = async (name: string, email: string, password: string) => {
-    const response = await authApi.register({ name, email, password });
+  const register = async (
+    name: string, 
+    email: string, 
+    password: string,
+    nationality?: string,
+    gender?: 'male' | 'female' | 'non_binary' | 'prefer_not_to_say',
+    birthDate?: string,
+    dataConsent: boolean = true,
+    anonymizedDataOptIn: boolean = false
+  ) => {
+    const registerData: RegisterRequest = {
+      name,
+      email,
+      password,
+      nationality,
+      gender,
+      birthDate,
+      dataConsent,
+      anonymizedDataOptIn,
+    };
+    
+    const response = await authApi.register(registerData);
     setUser(response.user);
     localStorage.setItem('token', response.token);
   };

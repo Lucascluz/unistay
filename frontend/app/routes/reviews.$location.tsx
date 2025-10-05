@@ -18,6 +18,7 @@ import { useReviews, useCreateReview, useMarkHelpful } from "~/lib/useReviews";
 import { locationsApi } from "~/lib/api/locations";
 import type { LocationStats } from "~/lib/api/types";
 import { ReviewResponses } from "~/components/ReviewResponses";
+import { TrustScoreBadge } from "~/components/TrustScoreBadge";
 
 export function meta({ params }: { params: { location: string } }) {
   return [
@@ -268,13 +269,18 @@ export default function ReviewsPage() {
                         <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
                           {review.author.charAt(0).toUpperCase()}
                         </div>
-                        <div>
-                          <div className="font-semibold text-gray-900 dark:text-white">
-                            {review.author}
+                        <div className="flex items-center gap-2">
+                          <div>
+                            <div className="font-semibold text-gray-900 dark:text-white">
+                              {review.author}
+                            </div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                              {formatDate(review.createdAt)}
+                            </div>
                           </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">
-                            {formatDate(review.createdAt)}
-                          </div>
+                          {review.authorTrustScore !== undefined && (
+                            <TrustScoreBadge score={review.authorTrustScore} size="sm" />
+                          )}
                         </div>
                       </div>
                       <Badge variant="outline" className="mb-2">

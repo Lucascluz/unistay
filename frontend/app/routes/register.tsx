@@ -6,6 +6,7 @@ import { Label } from "~/components/ui/label";
 import { Card } from "~/components/ui/card";
 import { useAuth } from "~/lib/auth";
 import type { Route } from "./+types/register";
+import type { RegisterRequest } from "~/lib/api/types";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -15,12 +16,20 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Register() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState<RegisterRequest>({
+    name: "",
+    email: "",
+    password: "",
+    nationality: "",
+    gender: undefined,
+    birthDate: "",
+    dataConsent: false,
+    anonymizedDataOptIn: false,
+  });
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showOptionalFields, setShowOptionalFields] = useState(false);
   
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -30,20 +39,34 @@ export default function Register() {
     e.preventDefault();
     setError("");
 
-    if (password !== confirmPassword) {
+    if (formData.password !== confirmPassword) {
       setError("Passwords do not match");
       return;
     }
 
-    if (password.length < 8) {
+    if (formData.password.length < 8) {
       setError("Password must be at least 8 characters");
+      return;
+    }
+
+    if (!formData.dataConsent) {
+      setError("You must consent to data processing to create an account");
       return;
     }
 
     setIsLoading(true);
 
     try {
-      await register(name, email, password);
+      await register(
+        formData.name, 
+        formData.email, 
+        formData.password,
+        formData.nationality,
+        formData.gender,
+        formData.birthDate,
+        formData.dataConsent,
+        formData.anonymizedDataOptIn
+      );
       
       // Redirect to the page they were trying to access, or home
       const redirectTo = searchParams.get("redirect") || "/";
@@ -89,39 +112,39 @@ export default function Register() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
+              <Label htmlFor="name">Full Name *</Label>
               <Input
                 id="name"
                 type="text"
                 placeholder="John Doe"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
                 disabled={isLoading}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">Email *</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
                 disabled={isLoading}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Password *</Label>
               <Input
                 id="password"
                 type="password"
                 placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
                 disabled={isLoading}
                 minLength={8}
@@ -132,7 +155,7 @@ export default function Register() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Label htmlFor="confirmPassword">Confirm Password *</Label>
               <Input
                 id="confirmPassword"
                 type="password"
@@ -142,6 +165,106 @@ export default function Register() {
                 required
                 disabled={isLoading}
               />
+            </div>
+
+            {/* Optional fields toggle */}
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => setShowOptionalFields(!showOptionalFields)}
+                className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 font-medium flex items-center gap-1"
+              >
+                {showOptionalFields ? '▼' : '▶'} 
+                {showOptionalFields ? 'Hide' : 'Add'} optional info (boosts your trust score!)
+              </button>
+            </div>
+
+            {/* Optional demographic fields */}
+            {showOptionalFields && (
+              <div className="space-y-4 pt-2 border-t">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  ✨ Adding this info increases your trust score and helps other students find relevant experiences!
+                </p>
+
+                <div className="space-y-2">
+                  <Label htmlFor="nationality">Nationality</Label>
+                  <Input
+                    id="nationality"
+                    type="text"
+                    placeholder="e.g., Germany, Brazil, USA"
+                    value={formData.nationality}
+                    onChange={(e) => setFormData({ ...formData, nationality: e.target.value })}
+                    disabled={isLoading}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="gender">Gender</Label>
+                  <select
+                    id="gender"
+                    value={formData.gender || ''}
+                    onChange={(e) => setFormData({ ...formData, gender: e.target.value as any })}
+                    disabled={isLoading}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <option value="">Prefer not to say</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="non_binary">Non-binary</option>
+                    <option value="prefer_not_to_say">Prefer not to say</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="birthDate">Birth Date</Label>
+                  <Input
+                    id="birthDate"
+                    type="date"
+                    value={formData.birthDate}
+                    onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
+                    disabled={isLoading}
+                    max={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Required consent */}
+            <div className="space-y-3 pt-2 border-t">
+              <div className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  id="dataConsent"
+                  checked={formData.dataConsent}
+                  onChange={(e) => setFormData({ ...formData, dataConsent: e.target.checked })}
+                  disabled={isLoading}
+                  className="mt-1 h-4 w-4 rounded border-gray-300"
+                  required
+                />
+                <label htmlFor="dataConsent" className="text-sm text-gray-700 dark:text-gray-300">
+                  <span className="font-semibold">I consent to data processing *</span>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Required to create an account and use StudentStay services
+                  </p>
+                </label>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  id="anonymizedDataOptIn"
+                  checked={formData.anonymizedDataOptIn}
+                  onChange={(e) => setFormData({ ...formData, anonymizedDataOptIn: e.target.checked })}
+                  disabled={isLoading}
+                  className="mt-1 h-4 w-4 rounded border-gray-300"
+                />
+                <label htmlFor="anonymizedDataOptIn" className="text-sm text-gray-700 dark:text-gray-300">
+                  I agree to share anonymized data for research
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Helps improve student housing insights (optional)
+                  </p>
+                </label>
+              </div>
             </div>
 
             <Button
