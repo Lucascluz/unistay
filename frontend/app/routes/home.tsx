@@ -56,7 +56,8 @@ export default function Home() {
                 alt="StudentStay Logo" 
                 className="h-40 w-40 object-contain"
               />
-              <span className="text-6xl font-bold text-gray-900 dark:text-white">StudentStay</span>
+              <span className="text-6xl font-bold text-gray-900 dark:text-white">Student</span>
+              <span className="text-6xl font-bold text-blue-900 dark:text-blue">Stay</span>
             </div>
             <nav className="hidden md:flex gap-6 items-center">
               <a href="#" className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">About</a>
