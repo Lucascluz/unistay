@@ -150,14 +150,33 @@ export interface ReviewResponse {
 
 export interface UserPublic {
   id: string;
+  name: string;
+  email: string;
   nationality?: string;
-  destination_university?: string;
-  study_field?: string;
-  current_city?: string;
-  current_housing_type?: string;
-  trust_score: number;
-  profile_completion_percentage: number;
+  gender?: 'male' | 'female' | 'non_binary' | 'prefer_not_to_say';
+  birthDate?: string;
+  languagePreferences?: string[];
+  currentCountry?: string;
+  currentCity?: string;
+  homeUniversity?: string;
+  destinationUniversity?: string;
+  studyField?: string;
+  studyLevel?: 'bachelor' | 'master' | 'phd' | 'exchange' | 'other';
+  studyStartDate?: string;
+  studyEndDate?: string;
+  currentHousingType?: 'student_home' | 'shared_apartment' | 'private_apartment' | 'family' | 'other';
+  monthlyRent?: number;
+  isCurrentlyRenting?: boolean;
+  hasLivedAbroadBefore?: boolean;
+  trustScore: number;
+  profileCompletionPercentage: number;
+  numberOfReviews: number;
+  numberOfHelpfulVotesReceived: number;
+  lastActivityAt?: string;
+  dataConsent: boolean;
+  anonymizedDataOptIn: boolean;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface CompanyPublic {
