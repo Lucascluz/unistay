@@ -8,6 +8,8 @@ import locationsRoutes from './routes/locations';
 import companiesRoutes from './routes/companies';
 import responsesRoutes from './routes/responses';
 import adminRoutes from './routes/admin';
+import adminAliasRoutes from './routes/admin-aliases';
+import searchRoutes from './routes/search';
 
 dotenv.config();
 
@@ -39,6 +41,8 @@ app.use('/api/locations', locationsRoutes);
 app.use('/api/companies', companiesRoutes);
 app.use('/api/responses', responsesRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/admin', adminAliasRoutes); // Admin alias management
+app.use('/api/search', searchRoutes); // Public search with aliases
 
 // 404 handler
 app.use((req, res) => {

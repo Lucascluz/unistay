@@ -19,6 +19,9 @@ import { locationsApi } from "~/lib/api/locations";
 import type { LocationStats } from "~/lib/api/types";
 import { ReviewResponses } from "~/components/ReviewResponses";
 import { TrustScoreBadge } from "~/components/TrustScoreBadge";
+import { CompanySearch } from "~/components/CompanySearch";
+import { searchApi, type SearchResult } from "~/lib/api/aliases";
+import { ArrowRight, Info } from "lucide-react";
 
 export function meta({ params }: { params: { location: string } }) {
   return [
@@ -39,12 +42,52 @@ export default function ReviewsPage() {
     rating: 5,
     review: "",
   });
+  const [selectedCompany, setSelectedCompany] = useState<SearchResult | null>(null);
   const [locationStats, setLocationStats] = useState<LocationStats | null>(null);
+  const [isResolvingAlias, setIsResolvingAlias] = useState(true);
+  const [aliasInfo, setAliasInfo] = useState<{
+    is_alias: boolean;
+    matched_alias?: string;
+    alias_type?: string;
+    canonical_name: string;
+  } | null>(null);
 
   // Use the custom hooks
   const { reviews, isLoading, error, hasMore, total, loadMore, refresh } = useReviews(decodedLocation);
   const { createReview, isSubmitting, error: submitError } = useCreateReview();
   const { markHelpful, loading: markingHelpful } = useMarkHelpful();
+
+  // Check if the location is an alias and redirect to canonical name
+  useEffect(() => {
+    const resolveLocationName = async () => {
+      try {
+        setIsResolvingAlias(true);
+        const resolution = await searchApi.resolveLocation(decodedLocation);
+        
+        if (resolution.should_redirect && resolution.canonical_name !== decodedLocation) {
+          // Redirect to the canonical company name
+          navigate(`/reviews/${encodeURIComponent(resolution.canonical_name)}`, { replace: true });
+        } else {
+          // Store alias info to show user if it's an alias match
+          setAliasInfo({
+            is_alias: resolution.is_alias,
+            matched_alias: resolution.matched_alias,
+            alias_type: resolution.alias_type,
+            canonical_name: resolution.canonical_name,
+          });
+          setIsResolvingAlias(false);
+        }
+      } catch (err) {
+        console.error('Failed to resolve location:', err);
+        // Continue anyway, just don't redirect
+        setIsResolvingAlias(false);
+      }
+    };
+
+    if (decodedLocation) {
+      resolveLocationName();
+    }
+  }, [decodedLocation, navigate]);
 
   // Fetch location stats
   useEffect(() => {
@@ -57,10 +100,10 @@ export default function ReviewsPage() {
       }
     };
     
-    if (decodedLocation) {
+    if (decodedLocation && !isResolvingAlias) {
       fetchStats();
     }
-  }, [decodedLocation]);
+  }, [decodedLocation, isResolvingAlias]);
 
   const handleWriteReview = () => {
     if (!isLoggedIn) {
@@ -68,7 +111,14 @@ export default function ReviewsPage() {
       navigate(`/login?redirect=/reviews/${encodeURIComponent(decodedLocation)}`);
     } else {
       setIsReviewDialogOpen(true);
+      setSelectedCompany(null);
+      setReviewData({ property: "", rating: 5, review: "" });
     }
+  };
+
+  const handleCompanySelect = (company: SearchResult) => {
+    setSelectedCompany(company);
+    setReviewData({ ...reviewData, property: company.company_name });
   };
 
   const handleSubmitReview = async (e: React.FormEvent) => {
@@ -118,6 +168,18 @@ export default function ReviewsPage() {
     }
   };
 
+  // Show loading state while resolving alias
+  if (isResolvingAlias) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Checking location...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       {/* Header */}
@@ -152,6 +214,31 @@ export default function ReviewsPage() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto">
+          {/* Alias Redirect Notice */}
+          {aliasInfo?.is_alias && aliasInfo.matched_alias && (
+            <Card className="p-4 mb-6 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+              <div className="flex items-start gap-3">
+                <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-1">
+                    Alternative Name Detected
+                  </h3>
+                  <p className="text-sm text-blue-800 dark:text-blue-200">
+                    We recognized "{aliasInfo.matched_alias}" as{' '}
+                    {aliasInfo.alias_type === 'abbreviation' ? 'an abbreviation' : 
+                     aliasInfo.alias_type === 'common_name' ? 'a common name' :
+                     aliasInfo.alias_type === 'misspelling' ? 'a common misspelling' :
+                     aliasInfo.alias_type === 'translation' ? 'a translation' :
+                     aliasInfo.alias_type === 'former_name' ? 'a former name' :
+                     aliasInfo.alias_type === 'local_name' ? 'a local name' : 'an alternative name'}{' '}
+                    for <strong>{aliasInfo.canonical_name}</strong>. 
+                    You're now viewing all reviews for this location.
+                  </p>
+                </div>
+              </div>
+            </Card>
+          )}
+
           {/* Location Header */}
           <div className="mb-8">
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
@@ -377,13 +464,30 @@ export default function ReviewsPage() {
           
           <form onSubmit={handleSubmitReview} className="space-y-6 mt-4">
             <div className="space-y-2">
-              <Label htmlFor="property">Property Name</Label>
+              <Label htmlFor="property">Company / Property Name</Label>
+              <CompanySearch
+                onSelect={handleCompanySelect}
+                placeholder="Search for a company (e.g., IPG, student housing platform, university...)"
+                initialValue={reviewData.property}
+                showSuggestions={true}
+                className="w-full"
+              />
+              <p className="text-xs text-gray-500">
+                Search using the official name, abbreviations, or common variations. 
+                {selectedCompany && selectedCompany.matched_alias !== selectedCompany.company_name && (
+                  <span className="text-green-600"> ✓ Matched via alias: "{selectedCompany.matched_alias}"</span>
+                )}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                Or enter a custom name if not found in the search results
+              </p>
               <Input
-                id="property"
-                placeholder="e.g., Campus Residences"
+                id="property-fallback"
+                placeholder="Enter custom property name if not found"
                 value={reviewData.property}
                 onChange={(e) => setReviewData({ ...reviewData, property: e.target.value })}
                 required
+                className="mt-2"
               />
             </div>
 
