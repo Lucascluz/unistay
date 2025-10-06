@@ -7,24 +7,24 @@ import { calculateUserProfileCompletion, calculateUserTrustScore, getUserProfile
 
 const router = Router();
 
-// Update profile schema
+// Update profile schema - accepts camelCase from frontend
 const updateProfileSchema = z.object({
   name: z.string().min(1).max(255).optional(),
   nationality: z.string().max(100).optional(),
   gender: z.enum(['male', 'female', 'non_binary', 'prefer_not_to_say']).optional(),
-  language_preferences: z.array(z.string()).optional(),
-  current_country: z.string().max(100).optional(),
-  current_city: z.string().max(100).optional(),
-  home_university: z.string().max(255).optional(),
-  destination_university: z.string().max(255).optional(),
-  study_field: z.string().max(255).optional(),
-  study_level: z.enum(['bachelor', 'master', 'phd', 'exchange', 'other']).optional(),
-  study_start_date: z.string().optional(),
-  study_end_date: z.string().optional(),
-  current_housing_type: z.enum(['student_home', 'shared_apartment', 'private_apartment', 'family', 'other']).optional(),
-  monthly_rent: z.number().optional(),
-  is_currently_renting: z.boolean().optional(),
-  has_lived_abroad_before: z.boolean().optional(),
+  languagePreferences: z.array(z.string()).optional(),
+  currentCountry: z.string().max(100).optional(),
+  currentCity: z.string().max(100).optional(),
+  homeUniversity: z.string().max(255).optional(),
+  destinationUniversity: z.string().max(255).optional(),
+  studyField: z.string().max(255).optional(),
+  studyLevel: z.enum(['bachelor', 'master', 'phd', 'exchange', 'other']).optional(),
+  studyStartDate: z.string().optional(),
+  studyEndDate: z.string().optional(),
+  currentHousingType: z.enum(['student_home', 'shared_apartment', 'private_apartment', 'family', 'other']).optional(),
+  monthlyRent: z.number().optional(),
+  isCurrentlyRenting: z.boolean().optional(),
+  hasLivedAbroadBefore: z.boolean().optional(),
 });
 
 // Get user profile
@@ -114,15 +114,46 @@ router.put('/profile', authenticateUser, async (req: Request, res: Response) => 
       });
     }
 
+    // Map camelCase to snake_case for database
+    const fieldMapping: Record<string, string> = {
+      name: 'name',
+      nationality: 'nationality',
+      gender: 'gender',
+      languagePreferences: 'language_preferences',
+      currentCountry: 'current_country',
+      currentCity: 'current_city',
+      homeUniversity: 'home_university',
+      destinationUniversity: 'destination_university',
+      studyField: 'study_field',
+      studyLevel: 'study_level',
+      studyStartDate: 'study_start_date',
+      studyEndDate: 'study_end_date',
+      currentHousingType: 'current_housing_type',
+      monthlyRent: 'monthly_rent',
+      isCurrentlyRenting: 'is_currently_renting',
+      hasLivedAbroadBefore: 'has_lived_abroad_before',
+    };
+
     // Build dynamic update query
     const fields: string[] = [];
     const values: any[] = [];
     let paramCount = 1;
 
+    // Convert updates to snake_case for database
+    const dbUpdates: Record<string, any> = {};
     Object.entries(updates).forEach(([key, value]) => {
       if (value !== undefined) {
-        fields.push(`${key} = $${paramCount}`);
-        values.push(value);
+        const dbField = fieldMapping[key] || key;
+        dbUpdates[dbField] = value;
+        
+        // Handle date conversions
+        if (dbField === 'study_start_date' || dbField === 'study_end_date') {
+          fields.push(`${dbField} = $${paramCount}`);
+          values.push(new Date(value as string));
+        } else {
+          fields.push(`${dbField} = $${paramCount}`);
+          values.push(value);
+        }
         paramCount++;
       }
     });
@@ -134,12 +165,12 @@ router.put('/profile', authenticateUser, async (req: Request, res: Response) => 
       });
     }
 
-    // Merge current user with updates (handle date conversions)
+    // Merge current user with updates for calculation
     const updatedUserData: Partial<User> = { 
-      ...currentUser.rows[0], 
-      ...updates,
-      study_start_date: updates.study_start_date ? new Date(updates.study_start_date) : currentUser.rows[0].study_start_date,
-      study_end_date: updates.study_end_date ? new Date(updates.study_end_date) : currentUser.rows[0].study_end_date,
+      ...currentUser.rows[0],
+      ...dbUpdates,
+      study_start_date: dbUpdates.study_start_date ? new Date(dbUpdates.study_start_date) : currentUser.rows[0].study_start_date,
+      study_end_date: dbUpdates.study_end_date ? new Date(dbUpdates.study_end_date) : currentUser.rows[0].study_end_date,
     };
 
     // Recalculate metrics
