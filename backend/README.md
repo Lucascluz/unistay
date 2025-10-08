@@ -1,15 +1,16 @@
-# StudyStay Backend
+# UniStay Backend
 
-Simple and maintainable Node.js + Express + TypeScript backend for StudyStay MVP.
+Simple and maintainable Node.js + Express + TypeScript backend for UniStay.
 
 ## Tech Stack
 
-- **Runtime**: Node.js
+- **Runtime**: Node.js 18+
 - **Framework**: Express
 - **Language**: TypeScript
-- **Database**: PostgreSQL (Docker)
+- **Database**: PostgreSQL
 - **Authentication**: JWT + bcrypt
 - **Validation**: Zod
+- **Email**: Resend API
 
 ## Getting Started
 
@@ -113,15 +114,29 @@ The API will be available at `http://localhost:3001`
 
 ## Environment Variables
 
-Copy `.env.example` to `.env` and adjust as needed:
+Copy `.env.example` to `.env` and configure:
 
 ```env
 PORT=3001
 NODE_ENV=development
+
+# Database
 DATABASE_URL=postgresql://studystay:studystay123@localhost:5432/studystay
-JWT_SECRET=your-secret-key
+
+# JWT - Generate strong random keys for production!
+JWT_SECRET=your-secret-key-change-in-production
 JWT_EXPIRES_IN=7d
+
+# Email - Get your API key from https://resend.com
+RESEND=your-resend-api-key
+FROM_EMAIL=noreply@yourdomain.com
+FRONTEND_URL=http://localhost:5173
+
+# Admin - Generate strong random key for production!
+ADMIN_SECRET_KEY=your-admin-secret-key-change-in-production
 ```
+
+**⚠️ SECURITY WARNING**: Never commit the `.env` file! Always use strong random keys in production.
 
 ## Development Commands
 
@@ -284,15 +299,43 @@ Success responses:
 
 ## Production Considerations
 
-Before deploying:
-1. Change `JWT_SECRET` to a strong random string
-2. Update `DATABASE_URL` to production database
-3. Set `NODE_ENV=production`
-4. Enable HTTPS
-5. Configure proper CORS origins
-6. Set up database backups
-7. Add rate limiting
-8. Add request logging (Morgan, Winston)
+Before deploying to production:
+
+1. **Environment Variables**:
+   - Generate strong random keys:
+     ```bash
+     node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+     ```
+   - Use the generated keys for `JWT_SECRET` and `ADMIN_SECRET_KEY`
+   - Get a Resend API key from https://resend.com
+   - Set `NODE_ENV=production`
+
+2. **Database**:
+   - Use a managed PostgreSQL service (Render, AWS RDS, etc.)
+   - Set up automated backups
+   - Use connection pooling
+
+3. **Security**:
+   - Enable HTTPS only
+   - Configure CORS for your frontend domain only
+   - Add rate limiting (e.g., express-rate-limit)
+   - Set up request logging (Morgan, Winston)
+   - Keep dependencies updated
+
+4. **Monitoring**:
+   - Set up error tracking (Sentry, etc.)
+   - Monitor API performance
+   - Set up health check endpoint monitoring
+
+5. **Migrations**:
+   - Run all migrations on first deploy:
+     ```bash
+     pnpm run migrate
+     pnpm run migrate:aliases
+     pnpm run migrate:email-verification
+     ```
+
+See the main [README.md](../README.md) for Render deployment instructions.
 
 ## Troubleshooting
 
@@ -313,4 +356,4 @@ lsof -ti:3001 | xargs kill
 
 ## License
 
-MIT
+ISC
