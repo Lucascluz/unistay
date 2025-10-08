@@ -40,10 +40,8 @@ A platform for students to share and discover accommodation reviews for study ab
    # Start PostgreSQL database
    docker-compose up -d
    
-   # Run migrations
-   pnpm run migrate
-   pnpm run migrate:aliases
-   pnpm run migrate:email-verification
+   # Run all migrations (single command!)
+   pnpm migrate
    ```
 
 3. **Set up the frontend**
@@ -142,14 +140,20 @@ The project uses PostgreSQL with the following main tables:
 
 ### Running Migrations
 
+The migration system automatically tracks which migrations have been run and only executes new ones:
+
 ```bash
 cd backend
-
-# Run all migrations
-pnpm run migrate              # Main schema
-pnpm run migrate:aliases       # Alias system
-pnpm run migrate:email-verification  # Email verification
+pnpm migrate
 ```
+
+This will:
+- Test database connection
+- Check which migrations are pending
+- Run only new migrations
+- Track execution in the database
+
+See [backend/MIGRATIONS.md](./backend/MIGRATIONS.md) for details.
 
 ## 📚 API Documentation
 
@@ -222,10 +226,13 @@ See [Backend README](./backend/README.md) for detailed API documentation.
    ```
 5. After deployment, run migrations via Render Shell:
    ```bash
-   pnpm run migrate
-   pnpm run migrate:aliases
-   pnpm run migrate:email-verification
+   cd /opt/render/project/src/backend
+   pnpm migrate
    ```
+   
+   The migration system automatically runs all pending migrations.
+
+For detailed step-by-step instructions, see [RENDER_CONFIG.md](./RENDER_CONFIG.md).
 
 #### Frontend
 

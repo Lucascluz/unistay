@@ -10,6 +10,7 @@ import responsesRoutes from './routes/responses';
 import adminRoutes from './routes/admin';
 import adminAliasRoutes from './routes/admin-aliases';
 import searchRoutes from './routes/search';
+import { testConnection } from './db/migrate';
 
 dotenv.config();
 
@@ -63,8 +64,35 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`✓ Server running on http://localhost:${PORT}`);
-  console.log(`✓ Environment: ${process.env.NODE_ENV || 'development'}`);
+// Start server with database connection test
+async function startServer() {
+  console.log('\n🚀 Starting UniStay Backend Server\n');
+  console.log('='.repeat(50));
+  
+  // Test database connection
+  const dbConnected = await testConnection();
+  
+  if (!dbConnected) {
+    console.error('\n⚠️  WARNING: Database connection failed!');
+    console.error('   Server will start but database operations will fail.');
+    console.error('   Check your DATABASE_URL in .env file\n');
+  }
+  
+  console.log('='.repeat(50) + '\n');
+  
+  // Start the server
+  app.listen(PORT, () => {
+    console.log(`✅ Server running on http://localhost:${PORT}`);
+    console.log(`✅ Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`✅ Health check: http://localhost:${PORT}/health\n`);
+    
+    if (dbConnected) {
+      console.log('💡 Tip: Run "pnpm migrate" to update database schema\n');
+    }
+  });
+}
+
+startServer().catch((error) => {
+  console.error('Failed to start server:', error);
+  process.exit(1);
 });

@@ -1,176 +1,223 @@
-import { pool } from './config';
+import { Pool } from 'pg';
+import { config } from 'dotenv';
+import * as fs from 'fs';
+import * as path from 'path';
 
-const migrations = [
-  // Migration 1: Create users table
-  `
-    CREATE TABLE IF NOT EXISTS users (
-      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-      name VARCHAR(255) NOT NULL,
-      email VARCHAR(255) UNIQUE NOT NULL,
-      password_hash VARCHAR(255) NOT NULL,
-      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-    );
-    
-    CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
-  `,
+config();
 
-  // Migration 1.5: Create admins table
-  `
-    CREATE TABLE IF NOT EXISTS admins (
-      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-      name VARCHAR(255) NOT NULL,
-      email VARCHAR(255) UNIQUE NOT NULL,
-      password_hash VARCHAR(255) NOT NULL,
-      role VARCHAR(50) NOT NULL DEFAULT 'admin' CHECK (role IN ('admin', 'super_admin')),
-      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-    );
-    
-    CREATE INDEX IF NOT EXISTS idx_admins_email ON admins(email);
-  `,
+// Determine if we need SSL (for external Render connections)
+const isRenderExternal = process.env.DATABASE_URL?.includes('render.com');
 
-  // Migration 2: Create reviews table
-  `
-    CREATE TABLE IF NOT EXISTS reviews (
-      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-      user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      location VARCHAR(255) NOT NULL,
-      property VARCHAR(255) NOT NULL,
-      rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
-      review TEXT NOT NULL,
-      helpful INTEGER DEFAULT 0,
-      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-    );
-    
-    CREATE INDEX IF NOT EXISTS idx_reviews_location ON reviews(location);
-    CREATE INDEX IF NOT EXISTS idx_reviews_user_id ON reviews(user_id);
-    CREATE INDEX IF NOT EXISTS idx_reviews_created_at ON reviews(created_at DESC);
-  `,
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: isRenderExternal ? {
+    rejectUnauthorized: false, // Render uses self-signed certificates
+  } : false,
+  // Connection settings for reliability
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000,
+});
 
-  // Migration 3: Create companies table
-  `
-    CREATE TABLE IF NOT EXISTS companies (
-      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-      name VARCHAR(255) NOT NULL,
-      email VARCHAR(255) UNIQUE NOT NULL,
-      password_hash VARCHAR(255) NOT NULL,
-      company_type VARCHAR(50) NOT NULL CHECK (company_type IN ('landlord', 'housing_platform', 'university')),
-      verification_status VARCHAR(50) NOT NULL DEFAULT 'pending' CHECK (verification_status IN ('pending', 'verified', 'rejected')),
-      verification_token VARCHAR(255),
-      verification_document_url TEXT,
-      tax_id VARCHAR(100),
-      website VARCHAR(500),
-      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-    );
-    
-    CREATE INDEX IF NOT EXISTS idx_companies_email ON companies(email);
-    CREATE INDEX IF NOT EXISTS idx_companies_verification_status ON companies(verification_status);
-    CREATE INDEX IF NOT EXISTS idx_companies_type ON companies(company_type);
-  `,
+interface Migration {
+  id: number;
+  name: string;
+  executedAt: Date;
+}
 
-  // Migration 4: Create company_representatives table
-  `
-    CREATE TABLE IF NOT EXISTS company_representatives (
-      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-      company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
-      user_email VARCHAR(255) NOT NULL,
-      role VARCHAR(100) NOT NULL,
-      is_primary BOOLEAN DEFAULT false,
-      verified BOOLEAN DEFAULT false,
-      verification_token VARCHAR(255),
-      verification_sent_at TIMESTAMP WITH TIME ZONE,
-      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-    );
-    
-    CREATE INDEX IF NOT EXISTS idx_company_representatives_company_id ON company_representatives(company_id);
-    CREATE INDEX IF NOT EXISTS idx_company_representatives_email ON company_representatives(user_email);
-    CREATE UNIQUE INDEX IF NOT EXISTS idx_company_representatives_unique ON company_representatives(company_id, user_email);
-  `,
-
-  // Migration 5: Create review_responses table
-  `
-    CREATE TABLE IF NOT EXISTS review_responses (
-      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-      review_id UUID NOT NULL REFERENCES reviews(id) ON DELETE CASCADE,
-      user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-      company_id UUID REFERENCES companies(id) ON DELETE CASCADE,
-      response_text TEXT NOT NULL,
-      is_company_response BOOLEAN NOT NULL DEFAULT false,
-      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-      CHECK (
-        (is_company_response = true AND company_id IS NOT NULL AND user_id IS NULL) OR
-        (is_company_response = false AND user_id IS NOT NULL AND company_id IS NULL)
-      )
-    );
-    
-    CREATE INDEX IF NOT EXISTS idx_review_responses_review_id ON review_responses(review_id);
-    CREATE INDEX IF NOT EXISTS idx_review_responses_user_id ON review_responses(user_id);
-    CREATE INDEX IF NOT EXISTS idx_review_responses_company_id ON review_responses(company_id);
-    CREATE INDEX IF NOT EXISTS idx_review_responses_created_at ON review_responses(created_at);
-  `,
-
-  // Migration 6: Create migrations tracking table
-  `
-    CREATE TABLE IF NOT EXISTS migrations (
-      id SERIAL PRIMARY KEY,
-      name VARCHAR(255) NOT NULL,
-      executed_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-    );
-  `,
-
-  // Migration 7: Create company verification actions log
-  `
-    CREATE TABLE IF NOT EXISTS company_verification_actions (
-      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-      company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
-      admin_id UUID REFERENCES admins(id) ON DELETE SET NULL,
-      action VARCHAR(50) NOT NULL CHECK (action IN ('verified', 'rejected', 'pending')),
-      notes TEXT,
-      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-    );
-    
-    CREATE INDEX IF NOT EXISTS idx_verification_actions_company_id ON company_verification_actions(company_id);
-    CREATE INDEX IF NOT EXISTS idx_verification_actions_admin_id ON company_verification_actions(admin_id);
-    CREATE INDEX IF NOT EXISTS idx_verification_actions_created_at ON company_verification_actions(created_at DESC);
-  `,
-];
-
-async function runMigrations() {
-  const client = await pool.connect();
-  
+/**
+ * Test database connection
+ */
+async function testConnection(): Promise<boolean> {
+  console.log('🔌 Testing database connection...');
   try {
-    console.log('🔄 Running database migrations...');
-    
-    for (let i = 0; i < migrations.length; i++) {
-      await client.query('BEGIN');
-      try {
-        await client.query(migrations[i]);
-        console.log(`✓ Migration ${i + 1} completed`);
-        await client.query('COMMIT');
-      } catch (error) {
-        await client.query('ROLLBACK');
-        console.error(`✗ Migration ${i + 1} failed:`, error);
-        throw error;
-      }
-    }
-    
-    console.log('✓ All migrations completed successfully');
+    const client = await pool.connect();
+    const result = await client.query('SELECT NOW()');
+    client.release();
+    console.log('✅ Database connection successful!');
+    console.log(`   Server time: ${result.rows[0].now}`);
+    return true;
   } catch (error) {
-    console.error('Migration error:', error);
-    process.exit(1);
+    console.error('❌ Database connection failed:');
+    if (error instanceof Error) {
+      console.error(`   ${error.message}`);
+    }
+    return false;
+  }
+}
+
+/**
+ * Create migrations tracking table if it doesn't exist
+ */
+async function createMigrationsTable(): Promise<void> {
+  const client = await pool.connect();
+  try {
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS schema_migrations (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL UNIQUE,
+        executed_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    console.log('✅ Migrations tracking table ready');
+  } catch (error) {
+    console.error('❌ Failed to create migrations table:', error);
+    throw error;
   } finally {
     client.release();
-    await pool.end();
   }
+}
+
+/**
+ * Get list of executed migrations
+ */
+async function getExecutedMigrations(): Promise<string[]> {
+  const client = await pool.connect();
+  try {
+    const result = await client.query<Migration>(
+      'SELECT name FROM schema_migrations ORDER BY id ASC'
+    );
+    return result.rows.map(row => row.name);
+  } catch (error) {
+    console.error('❌ Failed to fetch executed migrations:', error);
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+/**
+ * Get list of migration files from migrations directory
+ */
+function getMigrationFiles(): string[] {
+  const migrationsDir = path.join(__dirname, '../../migrations');
+  
+  if (!fs.existsSync(migrationsDir)) {
+    console.log('📁 No migrations directory found');
+    return [];
+  }
+
+  const files = fs.readdirSync(migrationsDir)
+    .filter(file => file.endsWith('.sql'))
+    .sort(); // Ensures they run in order (001_, 002_, etc.)
+
+  return files;
+}
+
+/**
+ * Execute a single migration file
+ */
+async function executeMigration(filename: string): Promise<void> {
+  const migrationsDir = path.join(__dirname, '../../migrations');
+  const filePath = path.join(migrationsDir, filename);
+  const sql = fs.readFileSync(filePath, 'utf-8');
+
+  const client = await pool.connect();
+  try {
+    console.log(`   Running: ${filename}`);
+    
+    // Execute migration
+    await client.query('BEGIN');
+    await client.query(sql);
+    
+    // Record migration as executed
+    await client.query(
+      'INSERT INTO schema_migrations (name) VALUES ($1)',
+      [filename]
+    );
+    
+    await client.query('COMMIT');
+    console.log(`   ✅ ${filename} completed`);
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error(`   ❌ ${filename} failed:`);
+    if (error instanceof Error) {
+      console.error(`   ${error.message}`);
+    }
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+/**
+ * Main migration runner
+ */
+async function runMigrations(): Promise<void> {
+  console.log('\n🚀 UniStay Database Migration Tool\n');
+  console.log('='.repeat(50));
+
+  // Test connection first
+  const connected = await testConnection();
+  if (!connected) {
+    console.error('\n❌ Cannot proceed without database connection');
+    console.error('   Check your DATABASE_URL in .env file');
+    process.exit(1);
+  }
+
+  console.log('='.repeat(50));
+
+  try {
+    // Create migrations tracking table
+    await createMigrationsTable();
+
+    // Get lists of migrations
+    const availableMigrations = getMigrationFiles();
+    const executedMigrations = await getExecutedMigrations();
+
+    // Find pending migrations
+    const pendingMigrations = availableMigrations.filter(
+      migration => !executedMigrations.includes(migration)
+    );
+
+    console.log('\n📊 Migration Status:');
+    console.log(`   Total migrations: ${availableMigrations.length}`);
+    console.log(`   Already executed: ${executedMigrations.length}`);
+    console.log(`   Pending: ${pendingMigrations.length}`);
+
+    if (pendingMigrations.length === 0) {
+      console.log('\n✅ Database is up to date! No migrations to run.');
+      return;
+    }
+
+    console.log('\n🔄 Running pending migrations:\n');
+
+    // Run pending migrations in order
+    for (const migration of pendingMigrations) {
+      await executeMigration(migration);
+    }
+
+    console.log('\n' + '='.repeat(50));
+    console.log('✅ All migrations completed successfully!');
+    console.log('='.repeat(50) + '\n');
+
+  } catch (error) {
+    console.error('\n' + '='.repeat(50));
+    console.error('❌ Migration failed!');
+    console.error('='.repeat(50) + '\n');
+    throw error;
+  }
+}
+
+/**
+ * Graceful shutdown
+ */
+async function cleanup(): Promise<void> {
+  await pool.end();
 }
 
 // Run migrations if this file is executed directly
 if (require.main === module) {
-  runMigrations();
+  runMigrations()
+    .then(() => {
+      cleanup();
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error('\nFull error details:', error);
+      cleanup();
+      process.exit(1);
+    });
 }
 
-export { runMigrations };
+export { runMigrations, testConnection };
