@@ -6,6 +6,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Card } from "~/components/ui/card";
 import { useCompanyAuth } from "~/lib/companyAuth";
+import { SimpleLogoHeader } from "~/components/PageHeader";
 
 export default function CompanyLogin() {
   const navigate = useNavigate();
@@ -31,7 +32,9 @@ export default function CompanyLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
+    <div className="min-h-screen bg-gray-50">
+      <SimpleLogoHeader />
+      <div className="flex items-center justify-center px-4 py-12">
       <Card className="w-full max-w-md p-8">
         <div className="flex flex-col items-center mb-8">
           <div className="h-12 w-12 bg-blue-600 rounded-lg flex items-center justify-center mb-4">
@@ -112,6 +115,7 @@ export default function CompanyLogin() {
           </div>
         </div>
       </Card>
+    </div>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router';
 import { apiClient } from '../lib/api/client';
+import { SimpleLogoHeader } from '~/components/PageHeader';
 
 export default function ResendVerification() {
   const navigate = useNavigate();
@@ -45,16 +46,18 @@ export default function ResendVerification() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Resend Verification Email
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Enter your email address to receive a new verification link
-          </p>
-        </div>
+    <div className="min-h-screen bg-gray-50">
+      <SimpleLogoHeader />
+      <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
+          <div>
+            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+              Resend Verification Email
+            </h2>
+            <p className="mt-2 text-center text-sm text-gray-600">
+              Enter your email address to receive a new verification link
+            </p>
+          </div>
 
         <div className="bg-white shadow rounded-lg p-6">
           {status === 'success' ? (
@@ -155,6 +158,7 @@ export default function ResendVerification() {
           )}
         </div>
       </div>
+    </div>
     </div>
   );
 }

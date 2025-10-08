@@ -6,6 +6,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Card } from "~/components/ui/card";
 import { useCompanyAuth } from "~/lib/companyAuth";
+import { SimpleLogoHeader } from "~/components/PageHeader";
 
 export default function CompanyRegister() {
   const navigate = useNavigate();
@@ -68,7 +69,9 @@ export default function CompanyRegister() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
+      <div className="min-h-screen bg-gray-50">
+        <SimpleLogoHeader />
+        <div className="flex items-center justify-center px-4 py-12">
         <Card className="w-full max-w-md p-8">
           <div className="flex flex-col items-center text-center">
             <div className="h-16 w-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
@@ -103,11 +106,14 @@ export default function CompanyRegister() {
           </div>
         </Card>
       </div>
+      </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
+    <div className="min-h-screen bg-gray-50">
+      <SimpleLogoHeader />
+      <div className="flex items-center justify-center px-4 py-12">
       <Card className="w-full max-w-2xl p-8">
         <div className="flex flex-col items-center mb-8">
           <div className="h-12 w-12 bg-blue-600 rounded-lg flex items-center justify-center mb-4">
@@ -275,6 +281,7 @@ export default function CompanyRegister() {
           </div>
         </div>
       </Card>
+    </div>
     </div>
   );
 }

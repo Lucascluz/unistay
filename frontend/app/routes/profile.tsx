@@ -7,6 +7,7 @@ import { Card } from "~/components/ui/card";
 import { TrustScoreBadge, TrustScoreDetail } from "~/components/TrustScoreBadge";
 import { ProfileCompletion } from "~/components/ProfileCompletion";
 import { EmailVerificationBanner } from "~/components/EmailVerificationBanner";
+import { PageHeader } from "~/components/PageHeader";
 import { userApi, type User, type UpdateUserProfileRequest, type UserProfileResponse, type TrustScoreResponse } from "~/lib/api";
 import { useAuth } from "~/lib/auth";
 import { Loader2, Save, User as UserIcon } from "lucide-react";
@@ -115,6 +116,8 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <PageHeader title="My Profile" showBackButton />
+      
       {/* Email Verification Banner */}
       {!profileData.user.emailVerified && (
         <EmailVerificationBanner email={profileData.user.email} />
