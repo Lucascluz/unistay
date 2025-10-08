@@ -8,6 +8,11 @@ export interface User {
   email: string;
   password_hash: string;
 
+  // Email verification
+  email_verified?: boolean;
+  verification_token?: string;
+  verification_token_expires_at?: Date;
+
   // Identity & demographics
   nationality?: string;
   gender?: 'male' | 'female' | 'non_binary' | 'prefer_not_to_say';
@@ -152,6 +157,7 @@ export interface UserPublic {
   id: string;
   name: string;
   email: string;
+  emailVerified?: boolean;
   nationality?: string;
   gender?: 'male' | 'female' | 'non_binary' | 'prefer_not_to_say';
   birthDate?: string;

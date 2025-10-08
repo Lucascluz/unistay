@@ -25,8 +25,8 @@ import { ArrowRight, Info } from "lucide-react";
 
 export function meta({ params }: { params: { location: string } }) {
   return [
-    { title: `${params.location} - Student Housing Reviews | StudentStay` },
-    { name: "description", content: `Read honest student housing reviews for ${params.location}` },
+    { title: `${params.location} - Student Housing Reviews | UniStay` },
+    { name: "description", content: `Read honest reviews from students about housing in ${params.location}` },
   ];
 }
 
@@ -192,10 +192,10 @@ export default function ReviewsPage() {
             >
               <img 
                 src="/study-stay-logo.png" 
-                alt="StudentStay Logo" 
+                alt="UniStay Logo" 
                 className="h-40 w-40 object-contain"
               />
-              <span className="text-6xl font-bold text-gray-900 dark:text-white">StudentStay</span>
+              <span className="text-6xl font-bold text-gray-900 dark:text-white">UniStay</span>
             </div>
             <div className="flex items-center gap-3">
               {isLoggedIn && (

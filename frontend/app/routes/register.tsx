@@ -5,13 +5,14 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Card } from "~/components/ui/card";
 import { useAuth } from "~/lib/auth";
+import { RegistrationSuccess } from "~/components/RegistrationSuccess";
 import type { Route } from "./+types/register";
 import type { RegisterRequest } from "~/lib/api/types";
 
-export function meta({}: Route.MetaArgs) {
+export function meta() {
   return [
-    { title: "Sign Up - StudentStay" },
-    { name: "description", content: "Create your StudentStay account" },
+    { title: "Sign Up - UniStay" },
+    { name: "description", content: "Create your UniStay account" },
   ];
 }
 
@@ -30,6 +31,7 @@ export default function Register() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showOptionalFields, setShowOptionalFields] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
   
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -68,15 +70,38 @@ export default function Register() {
         formData.anonymizedDataOptIn
       );
       
-      // Redirect to the page they were trying to access, or home
-      const redirectTo = searchParams.get("redirect") || "/";
-      navigate(redirectTo);
+      // Show success message instead of redirecting immediately
+      setRegistrationSuccess(true);
     } catch (err) {
       setError("Failed to create account. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
+
+  // If registration was successful, show success component
+  if (registrationSuccess) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <div 
+              className="flex items-center justify-center gap-8 mb-4 cursor-pointer"
+              onClick={() => navigate("/")}
+            >
+              <img 
+                src="/study-stay-logo.png" 
+                alt="UniStay Logo" 
+                className="h-48 w-48 object-contain"
+              />
+              <span className="text-7xl font-bold text-gray-900 dark:text-white">UniStay</span>
+            </div>
+          </div>
+          <RegistrationSuccess email={formData.email} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 flex items-center justify-center p-4">
@@ -89,10 +114,10 @@ export default function Register() {
           >
             <img 
               src="/study-stay-logo.png" 
-              alt="StudentStay Logo" 
+              alt="UniStay Logo" 
               className="h-48 w-48 object-contain"
             />
-            <span className="text-7xl font-bold text-gray-900 dark:text-white">StudentStay</span>
+            <span className="text-7xl font-bold text-gray-900 dark:text-white">UniStay</span>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
             Create your account
@@ -244,7 +269,7 @@ export default function Register() {
                 <label htmlFor="dataConsent" className="text-sm text-gray-700 dark:text-gray-300">
                   <span className="font-semibold">I consent to data processing *</span>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Required to create an account and use StudentStay services
+                    Required to create an account and use UniStay services
                   </p>
                 </label>
               </div>

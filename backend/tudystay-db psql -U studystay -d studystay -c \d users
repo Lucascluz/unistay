@@ -1,0 +1,59 @@
+                                           Table "public.users"
+              Column              |            Type             | Collation | Nullable |      Default      
+----------------------------------+-----------------------------+-----------+----------+-------------------
+ id                               | uuid                        |           | not null | gen_random_uuid()
+ name                             | character varying(255)      |           | not null | 
+ email                            | character varying(255)      |           | not null | 
+ password_hash                    | character varying(255)      |           | not null | 
+ created_at                       | timestamp with time zone    |           |          | CURRENT_TIMESTAMP
+ updated_at                       | timestamp with time zone    |           |          | CURRENT_TIMESTAMP
+ nationality                      | character varying(100)      |           |          | 
+ gender                           | character varying(30)       |           |          | 
+ birth_date                       | date                        |           |          | 
+ language_preferences             | text[]                      |           |          | 
+ current_country                  | character varying(100)      |           |          | 
+ current_city                     | character varying(100)      |           |          | 
+ home_university                  | character varying(255)      |           |          | 
+ destination_university           | character varying(255)      |           |          | 
+ study_field                      | character varying(255)      |           |          | 
+ study_level                      | character varying(50)       |           |          | 
+ study_start_date                 | date                        |           |          | 
+ study_end_date                   | date                        |           |          | 
+ current_housing_type             | character varying(50)       |           |          | 
+ monthly_rent                     | numeric(10,2)               |           |          | 
+ is_currently_renting             | boolean                     |           |          | false
+ has_lived_abroad_before          | boolean                     |           |          | false
+ trust_score                      | integer                     |           |          | 50
+ profile_completion_percentage    | integer                     |           |          | 0
+ number_of_reviews                | integer                     |           |          | 0
+ number_of_helpful_votes_received | integer                     |           |          | 0
+ last_activity_at                 | timestamp without time zone |           |          | 
+ data_consent                     | boolean                     |           | not null | false
+ anonymized_data_opt_in           | boolean                     |           |          | false
+ email_verified                   | boolean                     |           |          | false
+ verification_token               | character varying(255)      |           |          | 
+ verification_token_expires_at    | timestamp with time zone    |           |          | 
+Indexes:
+    "users_pkey" PRIMARY KEY, btree (id)
+    "idx_users_current_city" btree (current_city)
+    "idx_users_destination_university" btree (destination_university)
+    "idx_users_email" btree (email)
+    "idx_users_email_verified" btree (email_verified)
+    "idx_users_nationality" btree (nationality)
+    "idx_users_study_field" btree (study_field)
+    "idx_users_trust_score" btree (trust_score)
+    "idx_users_verification_token" btree (verification_token)
+    "users_email_key" UNIQUE CONSTRAINT, btree (email)
+Check constraints:
+    "users_current_housing_type_check" CHECK (current_housing_type::text = ANY (ARRAY['student_home'::character varying, 'shared_apartment'::character varying, 'private_apartment'::character varying, 'family'::character varying, 'other'::character varying]::text[]))
+    "users_gender_check" CHECK (gender::text = ANY (ARRAY['male'::character varying, 'female'::character varying, 'non_binary'::character varying, 'prefer_not_to_say'::character varying]::text[]))
+    "users_profile_completion_percentage_check" CHECK (profile_completion_percentage >= 0 AND profile_completion_percentage <= 100)
+    "users_study_level_check" CHECK (study_level::text = ANY (ARRAY['bachelor'::character varying, 'master'::character varying, 'phd'::character varying, 'exchange'::character varying, 'other'::character varying]::text[]))
+    "users_trust_score_check" CHECK (trust_score >= 0 AND trust_score <= 100)
+Referenced by:
+    TABLE "company_alias_suggestions" CONSTRAINT "company_alias_suggestions_suggested_by_user_id_fkey" FOREIGN KEY (suggested_by_user_id) REFERENCES users(id) ON DELETE CASCADE
+    TABLE "user_behavior_events" CONSTRAINT "fk_user_behavior_user" FOREIGN KEY (user_id) REFERENCES users(id)
+    TABLE "review_responses" CONSTRAINT "review_responses_user_id_fkey" FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    TABLE "reviews" CONSTRAINT "reviews_user_id_fkey" FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    TABLE "user_behavior_events" CONSTRAINT "user_behavior_events_user_id_fkey" FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+

@@ -3,17 +3,17 @@ version: '3.8'
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: studystay-db
+    container_name: unistay-db
     environment:
-      POSTGRES_USER: studystay
-      POSTGRES_PASSWORD: studystay123
-      POSTGRES_DB: studystay
+      POSTGRES_USER: unistay
+      POSTGRES_PASSWORD: unistay123
+      POSTGRES_DB: unistay
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U studystay"]
+      test: ["CMD-SHELL", "pg_isready -U unistay"]
       interval: 10s
       timeout: 5s
       retries: 5

@@ -18,6 +18,7 @@ interface AuthContextType {
     anonymizedDataOptIn?: boolean
   ) => Promise<void>;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -72,9 +73,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       anonymizedDataOptIn,
     };
     
-    const response = await authApi.register(registerData);
-    setUser(response.user);
-    localStorage.setItem('token', response.token);
+    console.log('🚀 Sending registration data:', registerData);
+    
+    try {
+      const response = await authApi.register(registerData);
+      console.log('✅ Registration successful:', response);
+      setUser(response.user);
+      localStorage.setItem('token', response.token);
+    } catch (error) {
+      console.error('❌ Registration failed:', error);
+      throw error;
+    }
   };
 
   const logout = async () => {
@@ -89,6 +98,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const refreshUser = async () => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const currentUser = await authApi.getCurrentUser();
+        setUser(currentUser);
+      } catch (error) {
+        console.error('Failed to refresh user:', error);
+        // Don't logout on refresh failure - could be temporary network issue
+      }
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -98,6 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         register,
         logout,
+        refreshUser,
       }}
     >
       {children}

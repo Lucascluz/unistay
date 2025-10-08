@@ -6,14 +6,15 @@ import { Label } from "~/components/ui/label";
 import { Card } from "~/components/ui/card";
 import { TrustScoreBadge, TrustScoreDetail } from "~/components/TrustScoreBadge";
 import { ProfileCompletion } from "~/components/ProfileCompletion";
+import { EmailVerificationBanner } from "~/components/EmailVerificationBanner";
 import { userApi, type User, type UpdateUserProfileRequest, type UserProfileResponse, type TrustScoreResponse } from "~/lib/api";
 import { useAuth } from "~/lib/auth";
 import { Loader2, Save, User as UserIcon } from "lucide-react";
 
 export function meta() {
   return [
-    { title: "My Profile - StudentStay" },
-    { name: "description", content: "Manage your StudentStay profile" },
+    { title: "My Profile - UniStay" },
+    { name: "description", content: "Manage your UniStay profile" },
   ];
 }
 
@@ -114,6 +115,11 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Email Verification Banner */}
+      {!profileData.user.emailVerified && (
+        <EmailVerificationBanner email={profileData.user.email} />
+      )}
+
       {/* Header */}
       <div className="bg-white border-b">
         <div className="max-w-6xl mx-auto px-4 py-6">
@@ -123,7 +129,14 @@ export default function Profile() {
                 <UserIcon className="w-8 h-8 text-blue-600" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">{profileData.user.name}</h1>
+                <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                  {profileData.user.name}
+                  {profileData.user.emailVerified && (
+                    <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                  )}
+                </h1>
                 <p className="text-gray-600">{profileData.user.email}</p>
               </div>
             </div>

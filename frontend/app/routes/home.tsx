@@ -4,11 +4,12 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Card } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
+import { EmailVerificationBanner } from "~/components/EmailVerificationBanner";
 import { useAuth } from "~/lib/auth";
 
 export function meta({ }: any) {
   return [
-    { title: "StudentStay - Find Honest Student Housing Reviews" },
+    { title: "UniStay - Find Honest Student Housing Reviews" },
     { name: "description", content: "Discover real student experiences and reviews about housing in your city or university." },
   ];
 }
@@ -45,6 +46,11 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900">
+      {/* Email Verification Banner */}
+      {isLoggedIn && user && !user.emailVerified && (
+        <EmailVerificationBanner email={user.email} />
+      )}
+      
       {/* Header */}
       <header className="border-b border-gray-200 dark:border-gray-800">
         <div className="container mx-auto px-4 py-4">
@@ -52,10 +58,10 @@ export default function Home() {
             <div className="flex items-center gap-6">
               <img
                 src="/study-stay-logo.png"
-                alt="StudentStay Logo"
+                alt="UniStay Logo"
                 className="h-40 w-40 object-contain"
               />
-              <span className="text-6xl font-bold text-gray-900 dark:text-white">Student</span>
+              <span className="text-6xl font-bold text-gray-900 dark:text-white">Uni</span>
               <span className="text-6xl font-bold text-blue-900 dark:text-blue">Stay</span>
             </div>
             <nav className="hidden md:flex gap-6 items-center">
@@ -187,7 +193,7 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              © 2025 StudentStay. All rights reserved.
+              © 2025 UniStay. All rights reserved.
             </p>
             <div className="flex gap-6 text-sm">
               <button
@@ -195,12 +201,6 @@ export default function Home() {
                 className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
               >
                 For Companies
-              </button>
-              <button
-                onClick={() => navigate("/admin/dashboard")}
-                className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
-              >
-                Admin Access
               </button>
             </div>
           </div>
