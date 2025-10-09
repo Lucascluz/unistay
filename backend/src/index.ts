@@ -22,8 +22,11 @@ const PORT = process.env.PORT || 3001;
 const allowedOrigins = [
   'http://localhost:5173', // Local development
   'http://localhost:3000', // Alternative local port
-  process.env.FRONTEND_URL, // Production frontend URL (Netlify)
+  'http://localhost:5174', // Alternative local port
+  process.env.FRONTEND_URL?.replace(/\/$/, ''), // Remove trailing slash if present
 ].filter(Boolean); // Remove undefined values
+
+console.log('🔐 CORS allowed origins:', allowedOrigins);
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -33,6 +36,8 @@ app.use(cors({
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.error(`❌ CORS blocked origin: ${origin}`);
+      console.error('   Allowed origins:', allowedOrigins);
       callback(new Error('Not allowed by CORS'));
     }
   },
