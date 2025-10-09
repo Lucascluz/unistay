@@ -62,6 +62,19 @@ export interface RegisterRequest {
   nationality?: string;
   gender?: User['gender'];
   birthDate?: string;
+  languagePreferences?: string[];
+  currentCountry?: string;
+  currentCity?: string;
+  homeUniversity?: string;
+  destinationUniversity?: string;
+  studyField?: string;
+  studyLevel?: User['studyLevel'];
+  studyStartDate?: string;
+  studyEndDate?: string;
+  currentHousingType?: User['currentHousingType'];
+  monthlyRent?: number;
+  isCurrentlyRenting?: boolean;
+  hasLivedAbroadBefore?: boolean;
   dataConsent: boolean;
   anonymizedDataOptIn?: boolean;
 }

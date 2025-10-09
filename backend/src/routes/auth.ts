@@ -18,10 +18,25 @@ const registerSchema = z.object({
   // Optional demographic fields - convert empty strings to undefined
   nationality: z.string().max(100).optional().or(z.literal("")).transform(val => val === "" ? undefined : val),
   gender: z.enum(['male', 'female', 'non_binary', 'prefer_not_to_say']).optional(),
-  birthDate: z.string().optional().or(z.literal("")).transform(val => val === "" ? undefined : val), // ISO date string - camelCase from frontend
+  birthDate: z.string().optional().or(z.literal("")).transform(val => val === "" ? undefined : val), // ISO date string
+  languagePreferences: z.array(z.string()).optional(),
+  currentCountry: z.string().max(100).optional().or(z.literal("")).transform(val => val === "" ? undefined : val),
+  currentCity: z.string().max(100).optional().or(z.literal("")).transform(val => val === "" ? undefined : val),
+  // Academic fields
+  homeUniversity: z.string().max(255).optional().or(z.literal("")).transform(val => val === "" ? undefined : val),
+  destinationUniversity: z.string().max(255).optional().or(z.literal("")).transform(val => val === "" ? undefined : val),
+  studyField: z.string().max(255).optional().or(z.literal("")).transform(val => val === "" ? undefined : val),
+  studyLevel: z.enum(['bachelor', 'master', 'phd', 'exchange', 'other']).optional(),
+  studyStartDate: z.string().optional().or(z.literal("")).transform(val => val === "" ? undefined : val),
+  studyEndDate: z.string().optional().or(z.literal("")).transform(val => val === "" ? undefined : val),
+  // Housing fields
+  currentHousingType: z.enum(['student_home', 'shared_apartment', 'private_apartment', 'family', 'other']).optional(),
+  monthlyRent: z.number().optional(),
+  isCurrentlyRenting: z.boolean().optional(),
+  hasLivedAbroadBefore: z.boolean().optional(),
   // Required consent
-  dataConsent: z.boolean(), // camelCase from frontend
-  anonymizedDataOptIn: z.boolean().optional(), // camelCase from frontend
+  dataConsent: z.boolean(),
+  anonymizedDataOptIn: z.boolean().optional(),
 });
 
 const loginSchema = z.object({
@@ -70,7 +85,14 @@ router.post('/register', async (req: Request, res: Response) => {
     console.log('📝 Registration request received:', JSON.stringify(req.body, null, 2));
     
     const data = registerSchema.parse(req.body);
-    const { name, email, password, nationality, gender, birthDate, dataConsent, anonymizedDataOptIn } = data;
+    const { 
+      name, email, password, nationality, gender, birthDate, 
+      languagePreferences, currentCountry, currentCity,
+      homeUniversity, destinationUniversity, studyField, studyLevel,
+      studyStartDate, studyEndDate, currentHousingType, monthlyRent,
+      isCurrentlyRenting, hasLivedAbroadBefore,
+      dataConsent, anonymizedDataOptIn 
+    } = data;
 
     console.log('✅ Validation passed:', { name, email, dataConsent });
 
@@ -110,7 +132,20 @@ router.post('/register', async (req: Request, res: Response) => {
       email,
       nationality,
       gender,
-      birth_date: birthDate ? new Date(birthDate) : undefined
+      birth_date: birthDate ? new Date(birthDate) : undefined,
+      language_preferences: languagePreferences,
+      current_country: currentCountry,
+      current_city: currentCity,
+      home_university: homeUniversity,
+      destination_university: destinationUniversity,
+      study_field: studyField,
+      study_level: studyLevel,
+      study_start_date: studyStartDate ? new Date(studyStartDate) : undefined,
+      study_end_date: studyEndDate ? new Date(studyEndDate) : undefined,
+      current_housing_type: currentHousingType,
+      monthly_rent: monthlyRent,
+      is_currently_renting: isCurrentlyRenting,
+      has_lived_abroad_before: hasLivedAbroadBefore,
     };
     
     const profile_completion = calculateUserProfileCompletion(profileData);
@@ -127,13 +162,17 @@ router.post('/register', async (req: Request, res: Response) => {
     const result = await pool.query<User>(
       `INSERT INTO users (
         name, email, password_hash, nationality, gender, birth_date,
+        language_preferences, current_country, current_city,
+        home_university, destination_university, study_field, study_level,
+        study_start_date, study_end_date, current_housing_type, monthly_rent,
+        is_currently_renting, has_lived_abroad_before,
         data_consent, anonymized_data_opt_in, trust_score, 
         profile_completion_percentage, number_of_reviews,
         number_of_helpful_votes_received, email_verified,
         verification_token, verification_token_expires_at,
         created_at, updated_at
       )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 0, 0, false, $11, $12, NOW(), NOW())
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, 0, 0, false, $24, $25, NOW(), NOW())
        RETURNING *`,
       [
         name, 
@@ -142,6 +181,19 @@ router.post('/register', async (req: Request, res: Response) => {
         nationality || null,
         gender || null,
         birthDate ? new Date(birthDate) : null,
+        languagePreferences || null,
+        currentCountry || null,
+        currentCity || null,
+        homeUniversity || null,
+        destinationUniversity || null,
+        studyField || null,
+        studyLevel || null,
+        studyStartDate ? new Date(studyStartDate) : null,
+        studyEndDate ? new Date(studyEndDate) : null,
+        currentHousingType || null,
+        monthlyRent || null,
+        isCurrentlyRenting || false,
+        hasLivedAbroadBefore || false,
         dataConsent,
         anonymizedDataOptIn || false,
         trust_score,

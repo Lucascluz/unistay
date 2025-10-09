@@ -253,6 +253,23 @@ export default function Profile() {
                       />
                     </div>
                   </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="languagePreferences">Language Preferences</Label>
+                    <Input
+                      id="languagePreferences"
+                      placeholder="e.g., English, Portuguese, Spanish (comma-separated)"
+                      value={formData.languagePreferences?.join(', ') || ''}
+                      onChange={(e) => setFormData({ 
+                        ...formData, 
+                        languagePreferences: e.target.value.split(',').map(lang => lang.trim()).filter(Boolean)
+                      })}
+                      disabled={isSaving}
+                    />
+                    <p className="text-xs text-gray-500">
+                      Enter languages you speak or prefer, separated by commas
+                    </p>
+                  </div>
                 </div>
 
                 {/* Academic Info */}
