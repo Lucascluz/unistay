@@ -43,7 +43,15 @@ function toPublicCompany(company: Company): CompanyPublic {
     email: company.email,
     companyType: company.company_type,
     verificationStatus: company.verification_status,
+    trust_score: company.trust_score,
+    response_rate: company.response_rate,
+    average_rating: company.average_rating,
+    data_completeness_score: company.data_completeness_score,
+    country: company.country,
+    city: company.city,
     website: company.website,
+    amenities: company.amenities,
+    partnership_status: company.partnership_status,
     createdAt: company.created_at.toISOString(),
   };
 }

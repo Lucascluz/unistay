@@ -188,6 +188,7 @@ export interface UserPublic {
 export interface CompanyPublic {
   id: string;
   name: string;
+  email: string;
   companyType: string;
   verificationStatus: string;
   trust_score: number;
