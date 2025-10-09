@@ -5,14 +5,11 @@ import * as path from 'path';
 
 config();
 
-// Determine if we need SSL (for external Render connections)
-const isRenderExternal = process.env.DATABASE_URL?.includes('render.com');
-
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: isRenderExternal ? {
-    rejectUnauthorized: false, // Render uses self-signed certificates
-  } : false,
+  ssl: {
+    rejectUnauthorized: true, // Neon uses proper SSL certificates
+  },
   // Connection settings for reliability
   max: 20,
   idleTimeoutMillis: 30000,
