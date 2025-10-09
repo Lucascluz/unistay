@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: unistay-backend
+    runtime: node
+    buildCommand: npm install && npm run build && npm run migrate
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false  # Set this manually in Render dashboard
+      - key: JWT_SECRET
+        sync: false  # Set this manually in Render dashboard
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: RESEND
+        sync: false  # Set this manually in Render dashboard
+      - key: ADMIN_SECRET_KEY
+        sync: false  # Set this manually in Render dashboard
+      - key: FROM_EMAIL
+        value: noreply@unistay.me
+      - key: FRONTEND_URL
+        sync: false  # Set this manually in Render dashboard (your Netlify URL)
