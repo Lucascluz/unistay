@@ -97,17 +97,17 @@ export default function Register() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 flex items-center justify-center p-4">
         <div className="w-full max-w-md">
-          <div className="text-center mb-8">
+          <div className="text-center mb-6 sm:mb-8">
             <div 
-              className="flex items-center justify-center gap-8 mb-4 cursor-pointer"
+              className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-4 cursor-pointer"
               onClick={() => navigate("/")}
             >
               <img 
                 src="/study-stay-logo.png" 
                 alt="UniStay Logo" 
-                className="h-48 w-48 object-contain"
+                className="h-16 w-16 sm:h-24 sm:w-24 object-contain"
               />
-              <span className="text-7xl font-bold text-gray-900 dark:text-white">UniStay</span>
+              <span className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 dark:text-white">UniStay</span>
             </div>
           </div>
           <RegistrationSuccess email={formData.email} />
@@ -120,29 +120,29 @@ export default function Register() {
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6 sm:mb-8">
           <div 
-            className="flex items-center justify-center gap-8 mb-4 cursor-pointer"
+            className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-4 cursor-pointer"
             onClick={() => navigate("/")}
           >
             <img 
               src="/study-stay-logo.png" 
               alt="UniStay Logo" 
-              className="h-48 w-48 object-contain"
+              className="h-16 w-16 sm:h-24 sm:w-24 object-contain"
             />
-            <span className="text-7xl font-bold text-gray-900 dark:text-white">UniStay</span>
+            <span className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 dark:text-white">UniStay</span>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
             Create your account
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
             Join thousands of students sharing their experiences
           </p>
         </div>
 
         {/* Register Form */}
-        <Card className="p-8 bg-white dark:bg-gray-900">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <Card className="p-6 sm:p-8 bg-white dark:bg-gray-900">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             {error && (
               <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
                 <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
@@ -210,7 +210,7 @@ export default function Register() {
               <button
                 type="button"
                 onClick={() => setShowOptionalFields(!showOptionalFields)}
-                className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 font-medium flex items-center gap-1 w-full justify-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+                className="text-xs sm:text-sm text-blue-600 hover:text-blue-700 dark:text-blue-500 font-medium flex items-center gap-1 w-full justify-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
               >
                 {showOptionalFields ? '▼' : '▶'} 
                 <span className="font-semibold">
@@ -224,9 +224,9 @@ export default function Register() {
 
             {/* Optional demographic fields */}
             {showOptionalFields && (
-              <div className="space-y-6 pt-4 border-t">
-                <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
+              <div className="space-y-4 sm:space-y-6 pt-4 border-t">
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-3 sm:p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <p className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white mb-1">
                     ✨ Why complete your profile?
                   </p>
                   <ul className="text-xs text-gray-600 dark:text-gray-300 space-y-1">
@@ -240,7 +240,7 @@ export default function Register() {
                 <div className="space-y-4">
                   <h3 className="font-semibold text-gray-900 dark:text-white text-sm">📋 Personal Information</h3>
                   
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="nationality">Nationality</Label>
                       <Input
@@ -525,12 +525,12 @@ export default function Register() {
             </Button>
           </form>
 
-          <div className="mt-6 text-center">
+          <div className="mt-6 text-center space-y-3">
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Already have an account?{" "}
               <button
                 onClick={() => navigate(`/login${searchParams.get("redirect") ? `?redirect=${searchParams.get("redirect")}` : ""}`)}
-                className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold"
+                className="text-blue-600 hover:text-blue-700 dark:text-blue-500 dark:hover:text-blue-600 font-semibold"
               >
                 Sign in
               </button>

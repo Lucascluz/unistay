@@ -64,29 +64,29 @@ export default function Login() {
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-950 dark:to-gray-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6 sm:mb-8">
           <div 
-            className="flex items-center justify-center gap-8 mb-4 cursor-pointer"
+            className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-4 cursor-pointer"
             onClick={() => navigate("/")}
           >
             <img 
               src="/study-stay-logo.png" 
               alt="UniStay Logo" 
-              className="h-48 w-48 object-contain"
+              className="h-16 w-16 sm:h-24 sm:w-24 object-contain"
             />
-            <span className="text-7xl font-bold text-gray-900 dark:text-white">UniStay</span>
+            <span className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 dark:text-white">UniStay</span>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
             Welcome back
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
             Sign in to your account to continue
           </p>
         </div>
 
         {/* Login Form */}
-        <Card className="p-8 bg-white dark:bg-gray-900">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <Card className="p-6 sm:p-8 bg-white dark:bg-gray-900">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             {success && (
               <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
                 <p className="text-sm text-green-600 dark:text-green-400">{success}</p>
@@ -99,7 +99,7 @@ export default function Login() {
                 {showResendLink && (
                   <button
                     onClick={() => navigate("/resend-verification", { state: { email } })}
-                    className="text-sm text-blue-600 dark:text-blue-400 underline mt-2 hover:text-blue-700"
+                    className="text-sm text-blue-600 dark:text-blue-500 underline mt-2 hover:text-blue-700 dark:hover:text-blue-600"
                   >
                     Resend verification email
                   </button>
@@ -142,21 +142,21 @@ export default function Login() {
             </Button>
           </form>
 
-          <div className="mt-6 text-center">
+          <div className="mt-6 text-center space-y-3">
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Don't have an account?{" "}
               <button
                 onClick={() => navigate(`/register${searchParams.get("redirect") ? `?redirect=${searchParams.get("redirect")}` : ""}`)}
-                className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold"
+                className="text-blue-600 hover:text-blue-700 dark:text-blue-500 dark:hover:text-blue-600 font-semibold"
               >
                 Sign up
               </button>
             </p>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-3">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               Are you a business?{" "}
               <button
                 onClick={() => navigate("/company/login")}
-                className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold"
+                className="text-blue-600 hover:text-blue-700 dark:text-blue-500 dark:hover:text-blue-600 font-semibold"
               >
                 Company Login
               </button>

@@ -31,7 +31,7 @@ export function ProfileCompletion({
 
   const getColor = () => {
     if (percentage >= 80) return 'bg-green-500';
-    if (percentage >= 60) return 'bg-blue-500';
+    if (percentage >= 60) return 'bg-blue-600';
     if (percentage >= 40) return 'bg-yellow-500';
     return 'bg-gray-400';
   };

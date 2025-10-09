@@ -34,14 +34,14 @@ export default function CompanyLogin() {
   return (
     <div className="min-h-screen bg-gray-50">
       <SimpleLogoHeader />
-      <div className="flex items-center justify-center px-4 py-12">
-      <Card className="w-full max-w-md p-8">
-        <div className="flex flex-col items-center mb-8">
-          <div className="h-12 w-12 bg-blue-600 rounded-lg flex items-center justify-center mb-4">
-            <Building2 className="h-6 w-6 text-white" />
+      <div className="flex items-center justify-center px-4 py-8 sm:py-12">
+      <Card className="w-full max-w-md p-6 sm:p-8">
+        <div className="flex flex-col items-center mb-6 sm:mb-8">
+          <div className="h-10 w-10 sm:h-12 sm:w-12 bg-blue-600 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
+            <Building2 className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Company Login</h1>
-          <p className="text-sm text-gray-600 mt-2">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Company Login</h1>
+          <p className="text-xs sm:text-sm text-gray-600 mt-2 text-center">
             Access your company dashboard
           </p>
         </div>
@@ -63,7 +63,7 @@ export default function CompanyLogin() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="email">Company Email</Label>
+            <Label htmlFor="email" className="text-sm">Company Email</Label>
             <Input
               id="email"
               type="email"
@@ -72,11 +72,12 @@ export default function CompanyLogin() {
               placeholder="company@example.com"
               required
               disabled={isLoading}
+              className="mt-1"
             />
           </div>
 
           <div>
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password" className="text-sm">Password</Label>
             <Input
               id="password"
               type="password"
@@ -85,12 +86,13 @@ export default function CompanyLogin() {
               placeholder="Enter your password"
               required
               disabled={isLoading}
+              className="mt-1"
             />
           </div>
 
           <Button
             type="submit"
-            className="w-full"
+            className="w-full bg-blue-600 hover:bg-blue-700"
             disabled={isLoading}
           >
             {isLoading ? "Logging in..." : "Login"}
@@ -98,17 +100,17 @@ export default function CompanyLogin() {
         </form>
 
         <div className="mt-6 text-center space-y-4">
-          <p className="text-sm text-gray-600">
+          <p className="text-xs sm:text-sm text-gray-600">
             Don't have a company account?{" "}
-            <Link to="/company/register" className="text-blue-600 hover:underline font-medium">
+            <Link to="/company/register" className="text-blue-600 hover:text-blue-700 underline font-medium">
               Register here
             </Link>
           </p>
           
           <div className="pt-4 border-t border-gray-200">
-            <p className="text-sm text-gray-600">
+            <p className="text-xs sm:text-sm text-gray-600">
               Looking for user login?{" "}
-              <Link to="/login" className="text-blue-600 hover:underline font-medium">
+              <Link to="/login" className="text-blue-600 hover:text-blue-700 underline font-medium">
                 Login as User
               </Link>
             </p>

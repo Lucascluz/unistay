@@ -55,30 +55,32 @@ export default function Home() {
       <header className="border-b border-gray-200 dark:border-gray-800">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2 sm:gap-4 md:gap-6">
               <img
                 src="/study-stay-logo.png"
                 alt="UniStay Logo"
-                className="h-40 w-40 object-contain"
+                className="h-10 w-10 sm:h-16 sm:w-16 md:h-24 md:w-24 object-contain"
               />
-              <span className="text-6xl font-bold text-gray-900 dark:text-white">Uni</span>
-              <span className="text-6xl font-bold text-blue-900 dark:text-blue">Stay</span>
+              <div className="flex items-center">
+                <span className="text-2xl sm:text-3xl md:text-5xl font-bold text-gray-900 dark:text-white">Uni</span>
+                <span className="text-2xl sm:text-3xl md:text-5xl font-bold text-blue-600 dark:text-blue-500">Stay</span>
+              </div>
             </div>
-            <nav className="hidden md:flex gap-6 items-center">
+            <nav className="flex gap-2 sm:gap-4 items-center">
               {isLoggedIn ? (
-                <div className="flex items-center gap-4">
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                <div className="flex items-center gap-2 sm:gap-4">
+                  <span className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 hidden sm:inline">
                     Hi, {user?.name}
                   </span>
-                  <Button variant="outline" size="sm" onClick={() => navigate("/profile")}>
-                    My Profile
+                  <Button variant="outline" size="sm" onClick={() => navigate("/profile")} className="text-xs sm:text-sm px-2 sm:px-3">
+                    Profile
                   </Button>
-                  <Button variant="outline" size="sm" onClick={logout}>
+                  <Button variant="outline" size="sm" onClick={logout} className="text-xs sm:text-sm px-2 sm:px-3">
                     Sign out
                   </Button>
                 </div>
               ) : (
-                <Button variant="outline" size="sm" onClick={() => navigate("/login")}>
+                <Button variant="outline" size="sm" onClick={() => navigate("/login")} className="text-xs sm:text-sm px-3 sm:px-4">
                   Sign in
                 </Button>
               )}
@@ -105,31 +107,31 @@ export default function Home() {
               ))}
             </div>
 
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-4">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-4 px-4">
               Find your perfect
               <br />
               <span className="text-blue-600 dark:text-blue-500">student home</span>
             </h1>
 
-            <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto px-4">
               Read honest reviews from real students about housing in your city or university.
               Make informed decisions for your student life.
             </p>
 
             {/* Search Form */}
-            <form onSubmit={handleSearch} className="max-w-2xl mx-auto mb-8">
+            <form onSubmit={handleSearch} className="max-w-2xl mx-auto mb-8 px-4">
               <div className="flex flex-col sm:flex-row gap-3">
                 <Input
                   type="text"
                   placeholder="Enter city, university or housing platform..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="flex-1 h-14 text-lg px-6 border-gray-300 dark:border-gray-700"
+                  className="flex-1 h-12 sm:h-14 text-base sm:text-lg px-4 sm:px-6 border-gray-300 dark:border-gray-700"
                 />
                 <Button
                   type="submit"
                   size="lg"
-                  className="h-14 px-8 bg-blue-600 hover:bg-blue-700 text-white"
+                  className="h-12 sm:h-14 px-6 sm:px-8 bg-blue-600 hover:bg-blue-700 text-white text-base sm:text-lg"
                 >
                   Search
                 </Button>
@@ -139,10 +141,10 @@ export default function Home() {
           </div>
 
           {/* Popular Searches */}
-          <Card className="p-8 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
+          <Card className="p-6 sm:p-8 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
             <div className="space-y-6">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-3">
                   Popular Cities
                 </h3>
                 <div className="flex flex-wrap gap-2">
@@ -150,7 +152,7 @@ export default function Home() {
                     <Badge
                       key={city}
                       variant="secondary"
-                      className="cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors px-4 py-2 text-sm"
+                      className="cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm"
                       onClick={() => navigate(`/reviews/${encodeURIComponent(city)}`)}
                     >
                       {city}
@@ -160,7 +162,7 @@ export default function Home() {
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-3">
                   Popular Universities
                 </h3>
                 <div className="flex flex-wrap gap-2">
@@ -168,7 +170,7 @@ export default function Home() {
                     <Badge
                       key={university}
                       variant="secondary"
-                      className="cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors px-4 py-2 text-sm"
+                      className="cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm"
                       onClick={() => navigate(`/reviews/${encodeURIComponent(university)}`)}
                     >
                       {university}
@@ -198,7 +200,7 @@ export default function Home() {
             <div className="flex gap-6 text-sm">
               <button
                 onClick={() => navigate("/company/login")}
-                className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
+                className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-500 transition-colors"
               >
                 For Companies
               </button>

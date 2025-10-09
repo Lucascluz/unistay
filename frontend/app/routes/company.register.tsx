@@ -113,14 +113,14 @@ export default function CompanyRegister() {
   return (
     <div className="min-h-screen bg-gray-50">
       <SimpleLogoHeader />
-      <div className="flex items-center justify-center px-4 py-12">
-      <Card className="w-full max-w-2xl p-8">
-        <div className="flex flex-col items-center mb-8">
-          <div className="h-12 w-12 bg-blue-600 rounded-lg flex items-center justify-center mb-4">
-            <Building2 className="h-6 w-6 text-white" />
+      <div className="flex items-center justify-center px-4 py-8 sm:py-12">
+      <Card className="w-full max-w-2xl p-6 sm:p-8">
+        <div className="flex flex-col items-center mb-6 sm:mb-8">
+          <div className="h-10 w-10 sm:h-12 sm:w-12 bg-blue-600 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
+            <Building2 className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Company Registration</h1>
-          <p className="text-sm text-gray-600 mt-2">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Company Registration</h1>
+          <p className="text-xs sm:text-sm text-gray-600 mt-2 text-center">
             Register your business to respond to reviews
           </p>
         </div>
@@ -135,10 +135,10 @@ export default function CompanyRegister() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="name">Company Name *</Label>
+              <Label htmlFor="name" className="text-sm">Company Name *</Label>
               <Input
                 id="name"
                 name="name"
@@ -147,17 +147,18 @@ export default function CompanyRegister() {
                 placeholder="Acme Housing LLC"
                 required
                 disabled={isLoading}
+                className="mt-1"
               />
             </div>
 
             <div>
-              <Label htmlFor="companyType">Company Type *</Label>
+              <Label htmlFor="companyType" className="text-sm">Company Type *</Label>
               <select
                 id="companyType"
                 name="companyType"
                 value={formData.companyType}
                 onChange={handleChange}
-                className="w-full h-10 px-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full h-10 px-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600 mt-1 text-sm sm:text-base"
                 required
                 disabled={isLoading}
               >
@@ -169,7 +170,7 @@ export default function CompanyRegister() {
           </div>
 
           <div>
-            <Label htmlFor="email">Company Email *</Label>
+            <Label htmlFor="email" className="text-sm">Company Email *</Label>
             <Input
               id="email"
               name="email"
@@ -178,6 +179,7 @@ export default function CompanyRegister() {
               onChange={handleChange}
               placeholder="contact@company.com"
               required
+              className="mt-1"
               disabled={isLoading}
             />
             <p className="text-xs text-gray-500 mt-1">
@@ -242,11 +244,11 @@ export default function CompanyRegister() {
             </div>
           </div>
 
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h3 className="font-semibold text-sm text-blue-900 mb-2">
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 sm:p-4">
+            <h3 className="font-semibold text-xs sm:text-sm text-blue-900 dark:text-blue-200 mb-2">
               Verification Process
             </h3>
-            <ul className="text-sm text-blue-800 space-y-1">
+            <ul className="text-xs sm:text-sm text-blue-800 dark:text-blue-300 space-y-1">
               <li>• Your registration will be reviewed by our team</li>
               <li>• We'll verify your business credentials</li>
               <li>• You'll receive an email once approved</li>
@@ -256,7 +258,7 @@ export default function CompanyRegister() {
 
           <Button
             type="submit"
-            className="w-full"
+            className="w-full bg-blue-600 hover:bg-blue-700"
             disabled={isLoading}
           >
             {isLoading ? "Submitting..." : "Register Company"}
@@ -264,17 +266,17 @@ export default function CompanyRegister() {
         </form>
 
         <div className="mt-6 text-center space-y-4">
-          <p className="text-sm text-gray-600">
+          <p className="text-xs sm:text-sm text-gray-600">
             Already have a company account?{" "}
-            <Link to="/company/login" className="text-blue-600 hover:underline font-medium">
+            <Link to="/company/login" className="text-blue-600 hover:text-blue-700 underline font-medium">
               Login here
             </Link>
           </p>
           
           <div className="pt-4 border-t border-gray-200">
-            <p className="text-sm text-gray-600">
+            <p className="text-xs sm:text-sm text-gray-600">
               Looking to register as a user?{" "}
-              <Link to="/register" className="text-blue-600 hover:underline font-medium">
+              <Link to="/register" className="text-blue-600 hover:text-blue-700 underline font-medium">
                 User Registration
               </Link>
             </p>

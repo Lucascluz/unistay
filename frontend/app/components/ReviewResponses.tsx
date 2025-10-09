@@ -64,7 +64,7 @@ export function ReviewResponses({ reviewId, responses = [], onResponseAdded }: R
 
       {/* Response form */}
       {showReplyForm && (
-        <Card className="p-4 border-blue-200 bg-blue-50">
+        <Card className="p-4 border-blue-200 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-800">
           <Textarea
             value={responseText}
             onChange={(e) => setResponseText(e.target.value)}
@@ -138,7 +138,7 @@ function ResponseItem({ response }: { response: ReviewResponse }) {
   };
 
   return (
-    <Card className={`p-4 ${isCompany ? 'border-blue-200 bg-blue-50' : 'border-gray-200'}`}>
+    <Card className={`p-4 ${isCompany ? 'border-blue-200 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-800' : 'border-gray-200'}`}>
       <div className="flex items-start gap-3">
         {/* Avatar */}
         <div className={`
@@ -154,13 +154,13 @@ function ResponseItem({ response }: { response: ReviewResponse }) {
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
             <span className="font-semibold text-sm">
               {response.authorName}
             </span>
             
             {isCompany && (
-              <Badge variant="secondary" className="text-xs bg-blue-600 text-white">
+              <Badge variant="secondary" className="text-xs bg-blue-600 text-white hover:bg-blue-700">
                 {getCompanyTypeLabel(response.companyType)}
               </Badge>
             )}

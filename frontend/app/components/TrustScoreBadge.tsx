@@ -16,7 +16,7 @@ export function TrustScoreBadge({
 }: TrustScoreBadgeProps) {
   const getColor = () => {
     if (score >= 80) return 'bg-green-100 text-green-800 border-green-300';
-    if (score >= 60) return 'bg-blue-100 text-blue-800 border-blue-300';
+    if (score >= 60) return 'bg-blue-50 text-blue-700 border-blue-300';
     if (score >= 40) return 'bg-yellow-100 text-yellow-800 border-yellow-300';
     return 'bg-gray-100 text-gray-800 border-gray-300';
   };
@@ -90,7 +90,7 @@ export function TrustScoreDetail({ score, breakdown, level }: TrustScoreDetailPr
         <div
           className={`h-3 rounded-full transition-all ${
             score >= 80 ? 'bg-green-500' :
-            score >= 60 ? 'bg-blue-500' :
+            score >= 60 ? 'bg-blue-600' :
             score >= 40 ? 'bg-yellow-500' : 'bg-gray-400'
           }`}
           style={{ width: `${score}%` }}

@@ -203,7 +203,7 @@ export default function AdminDashboard() {
 
   const getAliasTypeBadgeColor = (type: string) => {
     const colors: Record<string, string> = {
-      common_name: "bg-blue-100 text-blue-800",
+      common_name: "bg-blue-50 text-blue-700 border-blue-300",
       abbreviation: "bg-purple-100 text-purple-800",
       misspelling: "bg-orange-100 text-orange-800",
       translation: "bg-green-100 text-green-800",
@@ -303,7 +303,7 @@ export default function AdminDashboard() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <Shield className="w-12 h-12 text-blue-500 animate-pulse mx-auto mb-4" />
+          <Shield className="w-12 h-12 text-blue-600 animate-pulse mx-auto mb-4" />
           <p className="text-gray-600">Loading...</p>
         </div>
       </div>
@@ -315,7 +315,7 @@ export default function AdminDashboard() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <Card className="w-full max-w-md p-6">
           <div className="text-center mb-6">
-            <Shield className="w-12 h-12 text-blue-500 mx-auto mb-4" />
+            <Shield className="w-12 h-12 text-blue-600 mx-auto mb-4" />
             <h1 className="text-2xl font-bold">Admin Dashboard</h1>
             <p className="text-gray-600 mt-2">Enter your admin key to continue</p>
           </div>
@@ -357,7 +357,7 @@ export default function AdminDashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <Shield className="w-8 h-8 text-blue-500" />
+              <Shield className="w-8 h-8 text-blue-600" />
               <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
             </div>
             <div className="flex items-center gap-3">
@@ -422,7 +422,7 @@ export default function AdminDashboard() {
                     {stats.responses.find(r => r.is_company_response)?.count || '0'}
                   </p>
                 </div>
-                <MessageCircle className="w-10 h-10 text-blue-500" />
+                <MessageCircle className="w-10 h-10 text-blue-600" />
               </div>
             </Card>
           </div>

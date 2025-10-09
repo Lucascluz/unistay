@@ -185,26 +185,27 @@ export default function ReviewsPage() {
       {/* Header */}
       <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <div 
-              className="flex items-center gap-6 cursor-pointer"
+              className="flex items-center gap-2 sm:gap-4 cursor-pointer"
               onClick={() => navigate("/")}
             >
               <img 
                 src="/study-stay-logo.png" 
                 alt="UniStay Logo" 
-                className="h-40 w-40 object-contain"
+                className="h-10 w-10 sm:h-16 sm:w-16 md:h-24 md:w-24 object-contain"
               />
-              <span className="text-6xl font-bold text-gray-900 dark:text-white">UniStay</span>
+              <span className="text-2xl sm:text-3xl md:text-5xl font-bold text-gray-900 dark:text-white">UniStay</span>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               {isLoggedIn && (
-                <span className="text-sm text-gray-700 dark:text-gray-300 hidden sm:block">
+                <span className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 hidden md:block">
                   Hi, {user?.name}
                 </span>
               )}
-              <Button variant="outline" onClick={() => navigate("/")}>
-                Back to Search
+              <Button variant="outline" size="sm" onClick={() => navigate("/")} className="text-xs sm:text-sm px-2 sm:px-4">
+                <span className="hidden sm:inline">Back to Search</span>
+                <span className="sm:hidden">Back</span>
               </Button>
             </div>
           </div>
@@ -212,18 +213,18 @@ export default function ReviewsPage() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-6 sm:py-8">
         <div className="max-w-5xl mx-auto">
           {/* Alias Redirect Notice */}
           {aliasInfo?.is_alias && aliasInfo.matched_alias && (
-            <Card className="p-4 mb-6 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
-              <div className="flex items-start gap-3">
-                <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+            <Card className="p-3 sm:p-4 mb-6 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+              <div className="flex items-start gap-2 sm:gap-3">
+                <Info className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-500 mt-0.5 flex-shrink-0" />
                 <div className="flex-1">
-                  <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-1">
+                  <h3 className="text-sm sm:text-base font-semibold text-blue-900 dark:text-blue-100 mb-1">
                     Alternative Name Detected
                   </h3>
-                  <p className="text-sm text-blue-800 dark:text-blue-200">
+                  <p className="text-xs sm:text-sm text-blue-800 dark:text-blue-200">
                     We recognized "{aliasInfo.matched_alias}" as{' '}
                     {aliasInfo.alias_type === 'abbreviation' ? 'an abbreviation' : 
                      aliasInfo.alias_type === 'common_name' ? 'a common name' :
@@ -240,11 +241,11 @@ export default function ReviewsPage() {
           )}
 
           {/* Location Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
+          <div className="mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
               Student Housing in {decodedLocation}
             </h1>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
               {total > 0 ? `Read ${total} honest review${total !== 1 ? 's' : ''} from students` : 'Be the first to review!'}
             </p>
           </div>
