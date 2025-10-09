@@ -2,11 +2,9 @@ services:
   - type: web
     name: unistay-backend
     runtime: node
-    buildCommand: npm install && npm run build && npm run migrate
-    startCommand: npm start
+    buildCommand: pnpm install --prod=false && pnpm build && NODE_ENV=production pnpm run migrate
+    startCommand: NODE_ENV=production npm start
     envVars:
-      - key: NODE_ENV
-        value: production
       - key: DATABASE_URL
         sync: false  # Set this manually in Render dashboard
       - key: JWT_SECRET
